@@ -3,8 +3,6 @@ package fit.se2.medicarehub.model;
 import jakarta.persistence.*;
 import lombok.Data;
 
-import java.util.List;
-
 @Entity
 @Table(name = "Doctor")
 @Data

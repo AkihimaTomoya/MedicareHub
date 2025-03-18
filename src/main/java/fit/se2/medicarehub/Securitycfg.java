@@ -56,10 +56,10 @@ public class Securitycfg {
     public AuthenticationSuccessHandler customAuthenticationSuccessHandler() {
         return (req, res, authentication) -> {
             var authorities = authentication.getAuthorities();
-            String redirectUrl = "/";
+            String redirectUrl = "/home";
 
             if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
-                redirectUrl = "/admin/home";
+                redirectUrl = "/admin/statistics";
             } else if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_DOCTOR"))) {
                 redirectUrl = "/doctor/home";
             } else if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_PATIENT"))) {
