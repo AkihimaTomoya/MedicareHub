@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Entity
-@Table(name = "MedicalRecord")
+@Table(name = "medical_record") // kiểu giống lịch sử khám ý
 @Data
 public class MedicalRecord {
     @Id

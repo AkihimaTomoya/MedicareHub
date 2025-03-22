@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Entity
-@Table(name = "AppointmentReminder")
+@Table(name = "appointment_reminder")
 @Data
 public class AppointmentReminder {
     @Id

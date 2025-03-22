@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/_homepage">
+<head>
+    <meta charset="UTF-8">
+    <title>Medical Hub - Home</title>
+</head>
+<body>
+<div layout:fragment="content">
+    <section class="booking-section">
+        <div class="booking-header">
+            <div class="breadcrumb">
+                <a th:href="patient/home">Trang chủ</a> > <span>Đặt khám ngay</span>
+            </div>
+            <a href="create-report.html" class="btn-add-profile">
+                <i class="fa-solid fa-user-plus"></i> Thêm hồ sơ
+            </a>
+        </div>
+        <div class="patient-card">
+            <h3>Hồ sơ bệnh nhân</h3>
+            <div class="patient-info">
+                <ul>
+                    <li><i class="fa-solid fa-user"></i><span>Họ và tên:</span> <strong class="text-purple">NGUYỄN HOÀNG KHÔI</strong></li>
+                    <li><i class="fa-solid fa-calendar-days"></i><span>Ngày sinh:</span> 18/04/2004</li>
+                    <li><i class="fa-solid fa-phone"></i><span>SĐT:</span> ********756</li>
+                    <li><i class="fa-solid fa-venus-mars"></i><span>Giới tính:</span> Nam</li>
+                    <li><i class="fa-solid fa-location-dot"></i><span>Địa chỉ:</span> Số 10, Tổ 17, Yên Nghĩa, Hà Đông, Hà Nội</li>
+                    <li><i class="fa-solid fa-globe"></i><span>Dân tộc:</span> Kinh</li>
+                </ul>
+
+                <div class="action-btns">
+                    <div class="left-actions">
+                        <button type="button" class="delete-text">
+                            <i class="fa-solid fa-trash"></i> Xóa hồ sơ
+                        </button>
+                        <a href="editReport.html" class="edit-text">
+                            <i class="fa-solid fa-pen"></i> Chỉnh sửa
+                        </a>
+                    </div>
+                    <a href="chooseDoctor.html" class="next-btn">
+                        <i class="fa-solid fa-arrow-right"></i> <span>Tiếp tục</span>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </section>
+</div>
+</body>
+</html>

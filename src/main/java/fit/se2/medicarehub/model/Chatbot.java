@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Entity
-@Table(name = "ChatbotInteraction")
+@Table(name = "chatbot_interaction")
 @Data
 public class Chatbot {
     @Id

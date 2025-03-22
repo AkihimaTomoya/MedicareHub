@@ -2,12 +2,13 @@ package fit.se2.medicarehub.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 import java.util.List;
 
 @Entity
-@Table(name = "Patient")
+@Table(name = "patients")
 @Data
 public class Patient {
     @Id
@@ -18,9 +19,12 @@ public class Patient {
     private User user;
 
     @Temporal(TemporalType.DATE)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date dob;
 
     private String address;
+
+    private String ethnicity;
 
     //Validation data
 

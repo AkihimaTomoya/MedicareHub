@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Entity
-@Table(name = "Schedule")
+@Table(name = "schedules")
 @Data
 public class Schedule {
     @Id

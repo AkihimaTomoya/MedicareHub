@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.Date;
 
 @Entity
-@Table(name = "User")
+@Table(name = "users")
 @Data
 public class User {
     @Id
@@ -17,12 +17,13 @@ public class User {
     @JoinColumn(name = "roleID", nullable = false)
     private Role roleID;
 
-    private String userName;
+    private String username;
     private String fullName;
     private String email;
     private String phoneNumber;
     private String password;
     private String gender;
+    private String identityNumber;
     private String image;
     private boolean enabled;
 

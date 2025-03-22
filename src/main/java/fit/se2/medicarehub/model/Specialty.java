@@ -6,7 +6,7 @@ import lombok.Data;
 import java.util.List;
 
 @Entity
-@Table(name = "Specialty")
+@Table(name = "specialties")
 @Data
 public class Specialty {
     @Id
@@ -14,6 +14,10 @@ public class Specialty {
     private Long specialtyID;
 
     private String specialtyName;
+
+    private int numberOfDoctors;
+
+    private boolean specialtyStatus;
 
     @OneToMany(mappedBy = "specialty", cascade = CascadeType.ALL)
     private List<Doctor> doctors;
