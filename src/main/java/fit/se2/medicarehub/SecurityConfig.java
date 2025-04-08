@@ -46,7 +46,7 @@ public class SecurityConfig {
         http.csrf(AbstractHttpConfigurer::disable)
                 .authenticationProvider(authenticationProvider(passwordEncoder()))
                 .authorizeHttpRequests(auth -> auth
-                        .requestMatchers("/", "/home", "/auth/**","/css/**", "/js/**", "/images/**", "/layouts/**").permitAll()
+                        .requestMatchers("/", "/home", "/auth/**", "/terms","/css/**", "/js/**", "/images/**", "/layouts/**").permitAll()
                         .requestMatchers("/admin/**").hasAuthority("ROLE_ADMIN")
                         .requestMatchers("/doctor/**").hasAuthority("ROLE_DOCTOR")
                         .requestMatchers("/patient/**").hasAuthority("ROLE_PATIENT")

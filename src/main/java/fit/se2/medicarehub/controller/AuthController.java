@@ -1,13 +1,14 @@
 package fit.se2.medicarehub.controller;
 
-import fit.se2.medicarehub.model.Patient;
 import fit.se2.medicarehub.model.Role;
+import fit.se2.medicarehub.model.UserDTO;
 import fit.se2.medicarehub.repository.PatientRepository;
 import fit.se2.medicarehub.repository.RoleRepository;
 import fit.se2.medicarehub.repository.UserRepository;
+import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -17,13 +18,14 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import fit.se2.medicarehub.model.User;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Controller;
+import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import jakarta.servlet.http.HttpServletRequest;
-import java.util.Collection;
-import java.util.Date;
-import java.util.Map;
-import java.util.Optional;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+
+import java.util.*;
 
 @Controller
 @RequestMapping("/auth")
@@ -44,50 +46,45 @@ public class AuthController {
     @Autowired
     private PatientRepository patientRepository;
 
+    @Autowired
+    private JavaMailSender mailSender;
+
+
     // Endpoint đăng ký: tạo user với role PATIENT
     @PostMapping("/register")
-    public String register(
-            @RequestParam("email") String email,
-            @RequestParam("firstName") String firstName,
-            @RequestParam("lastName") String lastName,
-            @RequestParam("password") String password,
-            @RequestParam("confirmPassword") String confirmPassword,
-            org.springframework.ui.Model model) {
+    public String register(@Valid @ModelAttribute UserDTO userDTO,
+                           BindingResult bindingResult,
+                           RedirectAttributes redirectAttributes) {
 
-        // Kiểm tra xác nhận mật khẩu
-        if (!password.equals(confirmPassword)) {
-            model.addAttribute("error", "Password confirmation does not match");
-            return "homepage"; // Trả về trang đăng ký kèm lỗi
+        if (userRepository.findByUsername(userDTO.getEmail()).isPresent()) {
+            bindingResult.rejectValue("email", "", "Email đã được sử dụng");
+        }
+        if (!userDTO.getPassword().equals(userDTO.getConfirmPassword())) {
+            bindingResult.rejectValue("confirmPassword", "", "Mật khẩu xác nhận không khớp");
         }
 
-        // Sử dụng email làm username
-        if (userRepository.findByUsername(email) != null) {
-            model.addAttribute("error", "User already exists");
-            return "homepage";
+        if (bindingResult.hasErrors()) {
+            redirectAttributes.addFlashAttribute("userDTO", userDTO);
+            redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.userDTO", bindingResult);
+            redirectAttributes.addFlashAttribute("showForm", true);
+            return "redirect:/home?register=false";
         }
 
-        Optional<Role> patientRoleOpt = roleRepository.findByRoleName("ROLE_PATIENT");
-        if (!patientRoleOpt.isPresent()) {
-            model.addAttribute("error", "Patient role not configured");
-            return "homepage";
-        }
-
+        // Lưu user vào database
         User newUser = new User();
-        newUser.setUsername(email);
-        newUser.setEmail(email);
-        newUser.setFullName(lastName + " " + firstName);
-        newUser.setPassword(passwordEncoder.encode(password));
+        newUser.setUsername(userDTO.getEmail());
+        newUser.setEmail(userDTO.getEmail());
+        newUser.setFullName(userDTO.getLastName() + " " + userDTO.getFirstName());
+        Role patientRole = roleRepository.findByRoleName("ROLE_PATIENT")
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy role bệnh nhân"));
+        newUser.setRoleID(patientRole);
+        newUser.setPassword(passwordEncoder.encode(userDTO.getPassword()));
         newUser.setEnabled(true);
-        newUser.setRoleID(patientRoleOpt.get());
         newUser.setCreatedAt(new Date());
 
-        User user = userRepository.save(newUser);
+        userRepository.save(newUser);
 
-        Patient patient = new Patient();
-        patient.setUser(user);
-        patientRepository.save(patient);
-        // Sau khi đăng ký thành công, redirect về trang đăng nhập
-        return "redirect:/home";
+        return "redirect:/home?showLogin=true";
     }
 
     @PostMapping("/login")
@@ -103,6 +100,15 @@ public class AuthController {
             request.getSession(true)
                     .setAttribute("SPRING_SECURITY_CONTEXT", SecurityContextHolder.getContext());
 
+            Optional<User> currentUser = userRepository.findByEmail(email);
+            if (currentUser.isPresent() && "123".equals(password)) {
+                String token = UUID.randomUUID().toString();
+                currentUser.get().setUUID(token);
+                userRepository.save(currentUser.get());
+
+                return "redirect:/auth/reset-password?token=" + token;
+            }
+
             Collection<? extends GrantedAuthority> authorities = authentication.getAuthorities();
             if (authorities.stream().anyMatch(a -> a.getAuthority().equals("ROLE_ADMIN"))) {
                 return "redirect:/admin/dashboard";
@@ -116,35 +122,76 @@ public class AuthController {
         }
     }
 
-    // Endpoint reset mật khẩu: cập nhật mật khẩu mới cho user
+    @GetMapping("/reset-password")
+    public String resetPassword(@RequestParam("token") String token,
+                                Model model) {
+        Optional<User> userOptional = userRepository.findByUUID(token);
+        if (userOptional.isEmpty()) {
+            model.addAttribute("error", "Invalid or expired reset token.");
+            return "redirect:/home";
+        }
+        model.addAttribute("token", token);
+        return "reset-password";
+    }
+
     @PostMapping("/reset-password")
-    public ResponseEntity<String> resetPassword(@RequestBody Map<String, String> body) {
-        String email = body.get("email");
-        if (email == null || email.isEmpty()) {
-            return ResponseEntity.badRequest().body("Email is required");
+    public String changePassword(@RequestParam("password") String password,
+                                 @RequestParam("confirmPassword") String confirmPassword,
+                                 @RequestParam("token") String token,
+                                 Model model) {
+        Optional<User> user = userRepository.findByUUID(token);
+        if (user.isEmpty()) {
+            model.addAttribute("error", "Token invalid");
+            return "reset-password";
         }
-
-        // Tìm user theo email
-        User user = userRepository.findByEmail(email);
-        if (user == null) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User not found for email: " + email);
+        if (!password.equals(confirmPassword)) {
+            model.addAttribute("error", "Mật khẩu xác nhận không khớp");
+            return "reset-password";
         }
+        if (password.length() < 8) {
+            model.addAttribute("error", "Mật khẩu phải có ít nhất 8 ký tự");
+            return "reset-password";
+        }
+        user.get().setPassword(passwordEncoder.encode(password));
+        user.get().setUUID(null);
 
-        // Đặt lại mật khẩu về 123456 (đơn giản nhất)
-        String newPasswordPlain = "123456";
+        userRepository.save(user.get());
 
-        // Mã hoá và cập nhật
-        user.setPassword(passwordEncoder.encode(newPasswordPlain));
+        return "redirect:/home?showLogin=true";
+    }
+
+    @PostMapping("/forgot-password")
+    public String resetPassword(@RequestParam("email") String email,
+                                HttpServletRequest request,
+                                Model model) {
+        Optional<User> userOptional = userRepository.findByEmail(email);
+        if (userOptional.isEmpty()) {
+            model.addAttribute("error", "User not found");
+            return "redirect:/home?showForgot=true";
+        }
+        String token = UUID.randomUUID().toString();
+
+        User user = userOptional.get();
+
+        user.setUUID(token);
         userRepository.save(user);
 
-        // (Tuỳ chọn) Gửi email hoặc in ra console
-        // In ra console cho nhanh:
-        System.out.println("New password for " + email + " is: " + newPasswordPlain);
+        String resetPasswordUrl = getAppUrl(request) + "/reset-password?token=" + token;
 
-        // Hoặc nếu muốn gửi email:
-        // sendResetEmail(email, newPasswordPlain);
+        // Gửi email xác nhận reset mật khẩu sử dụng Mailtrap
+        SimpleMailMessage mailMessage = new SimpleMailMessage();
+        mailMessage.setTo(user.getEmail());
+        mailMessage.setSubject("Password Reset Confirmation");
+        mailMessage.setText("To reset your password, please click on the link below:\n" + resetPasswordUrl);
+        mailMessage.setFrom("noreply@example.com");
+        mailSender.send(mailMessage);
 
-        return ResponseEntity.ok("Password has been reset. Check console or email for the new password.");
+        model.addAttribute("message", "Password reset successfully. Please check your email for confirmation.");
+        return "homepage";
+    }
+
+    private String getAppUrl(HttpServletRequest request) {
+        return request.getRequestURL().toString().replace(request.getRequestURI(), request.getContextPath());
     }
 
     @GetMapping("/logout")

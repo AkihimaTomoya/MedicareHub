@@ -10,23 +10,23 @@
   <link rel="shortcuticon" th:href="@{/images/fav-icon.png}" />
   <link rel="preconnect" href="https://fonts.googleapis.com" />
   <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
   <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
   <script src="https://kit.fontawesome.com/38ea0ae7ae.js" crossorigin="anonymous"></script>
   <script th:src="@{/js/chatbot.js}"></script>
-  <script th:src="@{/js/homepage.js}"></script>
 </head>
 <body>
 <!-- Navbar & Hero Header -->
 <section id="hero">
   <nav class="navigation">
-    <a href="#" class="logo"><span>Medical</span>Hub</a>
+    <a th:href="@{/home}" class="logo"><span>Medical</span>Hub</a>
     <ul class="menu">
-      <li><a href="#" onclick="smoothScroll(event, '')">Trang chủ</a></li>
+      <li><a th:href="@{/home}" onclick="smoothScroll(event, '')">Trang chủ</a></li>
       <li><a href="#our_story" onclick="smoothScroll(event, 'our_story')">Giới thiệu</a></li>
       <li><a href="#support-contact" onclick="smoothScroll(event, 'support-contact')">Liên hệ</a></li>
     </ul>
-    <a href="#" class="nav-signin-btn" onclick="showForm('login')">Đăng nhập</a>
-    <a href="#" class="nav-signup-btn" onclick="showForm('register')">Đăng ký</a>
+    <a class="nav-signin-btn" onclick="showForm('login')">Đăng nhập</a>
+    <a class="nav-signup-btn" onclick="showForm('register')">Đăng ký</a>
   </nav>
   <!-- Nội dung trang sẽ được chèn tại đây -->
   <div layout:fragment="content">
@@ -66,53 +66,6 @@
   <p class="footer-bottom">© 2024 MedicalHub. All rights reserved.</p>
 </footer>
 
-<!-- Modal for Forms -->
-<div id="modal" class="modal">
-  <div class="modal-content">
-    <span class="close" onclick="hideForm()">×</span>
-
-    <!-- Login Form -->
-    <div class="form-container" id="login-form">
-      <h2>Đăng nhập</h2>
-      <form id="login-form-submit" action="/auth/login" method="post">
-        <input type="email" id="email" name="email" placeholder="Nhập email của bạn" required />
-        <input type="password" id="password" name="password" placeholder="Mật khẩu" required />
-        <button type="submit" class="btn-primary">Đăng nhập</button>
-      </form>
-      <p class="forgot-password"><a href="#" onclick="showForm('forgot')">Quên mật khẩu?</a></p>
-    </div>
-
-    <!-- Register Form -->
-    <div class="form-container" id="register-form" style="display: none">
-      <h2>Đăng ký Tài khoản</h2>
-      <form id="register-form-submit" action="auth/register" method="post">
-        <input type="text" name="firstName" placeholder="Tên của bạn" required />
-        <input type="text" name="lastName" placeholder="Họ của bạn" required />
-        <input type="email" name="email" placeholder="Nhập email của bạn" required />
-        <input type="password" name="password" placeholder="Mật khẩu" required />
-        <input type="password" name="confirmPassword" placeholder="Xác nhận mật khẩu" required />
-        <label> <input type="checkbox" /> Tôi đồng ý với <a href="terms.html" target="_blank" class="terms-link">điều khoản và điều kiện</a> </label>
-        <div id="checkbox-error" class="error-message" style="display: none"></div>
-        <button type="submit" class="btn-primary">Đăng ký</button>
-      </form>
-      <p>Bạn đã có tài khoản? <a href="#" class="register" onclick="showForm('login')">Đăng nhập</a></p>
-    </div>
-
-    <!-- Forgot Password Form -->
-    <div class="form-container" id="forgot-form" style="display: none">
-      <h2>Khôi phục mật khẩu</h2>
-      <p>Chúng tôi sẽ gửi bạn hướng dẫn bằng email</p>
-      <form id="forgot-form-submit" action="auth/reset-password" method="post">
-        <input type="email" placeholder="Nhập email của bạn" required />
-        <div id="forgot-success" class="success-message" style="display: none">
-          <p>Bạn vui lòng kiểm tra email để cấp lại mật khẩu!</p>
-        </div>
-        <button type="submit" class="btn-primary">Gửi yêu cầu</button>
-      </form>
-      <p>Bạn muốn quay lại? <a href="#" class="register" onclick="showForm('login')">Đăng nhập</a></p>
-    </div>
-  </div>
-</div>
 
 <!-- Chatbot elements -->
 <div id="chatbot-button" class="floating-button">

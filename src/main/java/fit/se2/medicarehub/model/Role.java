@@ -17,4 +17,6 @@ public class Role {
 
     @OneToMany(mappedBy = "roleID", cascade = CascadeType.ALL)
     private List<User> users;
+
+
 }

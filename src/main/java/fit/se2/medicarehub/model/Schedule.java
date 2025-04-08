@@ -17,6 +17,12 @@ public class Schedule {
     @JoinColumn(name = "doctorID", nullable = false)
     private Doctor doctor;
 
+    private String service;
+
+    private String room;
+
+    private int seatCount;
+
     @Temporal(TemporalType.TIMESTAMP)
     private Date startTime;
 

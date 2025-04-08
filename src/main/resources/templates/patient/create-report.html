@@ -26,7 +26,11 @@
         <div class="patient-content">
             <div class="container">
                 <div class="breadcrumb">Trang chủ > Tạo hồ sơ bệnh nhân</div>
-                <h2>Chỉnh sửa hồ sơ bệnh nhân</h2>
+                <h2>Tạo hồ sơ bệnh nhân</h2>
+                <div class="tab-header">
+                    <a th:href="@{/patient/create-report}" class="active">Chưa từng khám</a>
+                    <a th:href="@{/patient/have-report}">Đã từng khám</a>
+                </div>
                 <div class="form-section">
                     <h3>NHẬP THÔNG TIN BỆNH NHÂN</h3>
                     <div class="note-section">

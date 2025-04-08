@@ -2,6 +2,7 @@ package fit.se2.medicarehub.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
 
@@ -23,11 +24,16 @@ public class Appointment {
     private Patient patient;
 
     @Temporal(TemporalType.TIMESTAMP)
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date appointmentDate;
+
+    private int queueNumber;
 
     @Enumerated(EnumType.STRING)
     private AppointmentStatus status;
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
+
+
 }

@@ -4,6 +4,16 @@ document.addEventListener('DOMContentLoaded', function() {
     if (modal) {
         modal.style.display = 'none';
     }
+    const params = new URLSearchParams(window.location.search);
+    if (params.has('showLogin')) {
+        showForm('login');
+    }
+    if (params.has('register')) {
+        showForm('register')
+    }
+    if (params.has('forgot')) {
+        showForm('forgot')
+    }
 });
 
 // Hiển thị modal với 3 form: login, register, forgot
@@ -26,46 +36,34 @@ function showForm(formType) {
 }
 
 // Ẩn modal
+// Ẩn modal và reset form
 function hideForm() {
     const modal = document.getElementById('modal');
     if (modal) {
         modal.style.display = 'none';
+        history.replaceState(null, null, window.location.pathname);
     }
+
+    // Xóa nội dung trong tất cả các input field
+    document.querySelectorAll("#register-form input, #login-form input, #forgot-form input").forEach((el) => {
+        el.value = ""; // Reset giá trị input
+        el.classList.remove("error"); // Loại bỏ class lỗi nếu có
+    });
+
+    // Xóa nội dung thông báo lỗi và ẩn các phần tử có class error-message
+    document.querySelectorAll(".error-message").forEach((el) => {
+        el.innerHTML = "";
+        el.style.display = "none";
+    });
 }
 
-// Đóng modal khi click ra ngoài vùng nội dung modal
 window.onclick = function(event) {
     const modal = document.getElementById('modal');
     if (modal && event.target === modal) {
         hideForm();
     }
 };
-document.getElementById("register-form-submit").addEventListener("submit", function(event) {
-    event.preventDefault(); // Chặn hành vi submit mặc định
 
-    const form = event.target;
-    const formData = new FormData(form);
-
-    fetch("auth/register", {
-        method: "POST",
-        body: formData
-    })
-        .then(async response => {
-            const data = await response.json();
-            if (!response.ok) {
-                // Hiển thị lỗi trong form
-                const errorDiv = document.getElementById("form-error");
-                errorDiv.style.display = "block";
-                errorDiv.innerText = data.error;
-            } else {
-                // Xử lý khi đăng ký thành công, ví dụ chuyển hướng hoặc thông báo
-                alert(data.success);
-            }
-        })
-        .catch(error => {
-            console.error("Lỗi khi gửi dữ liệu:", error);
-        });
-});
 
 // Smooth scroll function
 function smoothScroll(event, sectionId) {
@@ -77,27 +75,3 @@ function smoothScroll(event, sectionId) {
     }
 }
 
-
-// // Xử lý submit form quên mật khẩu qua AJAX
-// document.getElementById('forgot-form-submit').addEventListener('submit', function(event) {
-//     event.preventDefault();
-//     const form = event.target;
-//     const formData = new FormData(form);
-//     const jsonData = {};
-//     for (const [key, value] of formData.entries()) {
-//         jsonData[key] = value;
-//     }
-//     fetch(form.action, {
-//         method: 'POST',
-//         body: JSON.stringify(jsonData),
-//         headers: { "Content-Type": "application/json" }
-//     })
-//         .then(response => response.text())
-//         .then(text => {
-//             alert(text);
-//         })
-//         .catch(error => {
-//             console.error("Lỗi gửi yêu cầu quên mật khẩu:", error);
-//             alert("Lỗi gửi yêu cầu");
-//         });
-// });

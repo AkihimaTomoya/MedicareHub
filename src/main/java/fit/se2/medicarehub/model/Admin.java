@@ -14,4 +14,6 @@ public class Admin {
     @OneToOne
     @JoinColumn(name = "userID", nullable = false, unique = true)
     private User user;
+
+    private String address;
 }

@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:layout="http://www.ultraq.net.nz/thymeleaf/layout"
+      layout:decorate="layouts/_patient">
+<head>
+    <meta charset="UTF-8">
+    <title>Medical Hub - Report</title>
+    <link rel="stylesheet" th:href="@{/css/detailRecord.css}"/>
+</head>
+<body>
+<div layout:fragment="content">
+    <section id="hero">
+        <main class="patient-record-container">
+            <div class="content-wrapper container">
+                <!-- Sidebar + Breadcrumb cùng 1 cột -->
+                <div class="sidebar">
+                    <div class="breadcrumb">
+                        <a th:href="@{/patient/home}">Trang chủ</a> >
+                        <a>Chi tiết phiếu khám bệnh</a>
+                    </div>
+                </div>
+                <div class="main-content">
+                    <div class="ticket">
+                        <!-- Khối trên (lớn hơn) -->
+                        <div class="ticket-top">
+                            <h2>Phiếu khám bệnh</h2>
+                            <p class="order-label">Số thứ tự tiếp nhận</p>
+                            <div class="order-number" th:text="${appointment.queueNumber}">07</div>
+
+                            <div class="ticket-info">
+                                <p>
+                                    <i class="fa-solid fa-heart-circle-plus"></i>
+                                    Chuyên khoa: <span th:text="${appointment.doctor.specialty.specialtyName}"> Tổng quát</span>
+                                </p>
+                                <p>
+                                    <i class="fa-solid fa-user-doctor"></i>
+                                    <span th:text="${appointment.doctor.academicDegree}"></span>
+                                    <span th:text="${appointment.doctor.user.fullName}">ThS Nguyễn Văn A</span>
+                                </p>
+                                <p>
+                                    <i class="fa-solid fa-calendar-days"></i>
+                                    Ngày khám: <span th:text="${#dates.format(appointment.appointmentDate, 'dd/MM/yyyy')}">18/04/2025</span>
+                                </p>
+                            </div>
+                        </div>
+
+                        <div class="dashed"></div>
+
+                        <!-- Khối dưới (nhỏ hơn) -->
+                        <div class="ticket-bottom">
+                            <p class="barcode-title">Mã phiếu khám</p>
+                            <div class="barcode">
+                                <img th:src="@{/images/barcode.png}" alt="Barcode" />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <div class="btn-return">
+                    <a th:href="@{/patient/appointment-list}">
+                        <button class="btn-primary">Quay lại</button>
+                    </a>
+                </div>
+
+            </div>
+        </main>
+    </section>
+
+</div>
+</body>
+</html>

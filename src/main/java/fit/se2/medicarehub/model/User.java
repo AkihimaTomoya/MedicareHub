@@ -2,12 +2,14 @@ package fit.se2.medicarehub.model;
 
 import jakarta.persistence.*;
 import lombok.Data;
+import lombok.ToString;
 
 import java.util.Date;
 
 @Entity
 @Table(name = "users")
 @Data
+@ToString(exclude = "roleID")
 public class User {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
@@ -17,8 +19,10 @@ public class User {
     @JoinColumn(name = "roleID", nullable = false)
     private Role roleID;
 
+    @Column(unique = true, nullable = false)
     private String username;
     private String fullName;
+    @Column(unique = true, nullable = false)
     private String email;
     private String phoneNumber;
     private String password;
@@ -29,4 +33,7 @@ public class User {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
+
+    private String UUID;
+
 }

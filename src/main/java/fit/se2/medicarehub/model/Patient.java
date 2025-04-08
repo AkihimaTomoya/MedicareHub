@@ -5,7 +5,6 @@ import lombok.Data;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import java.util.Date;
-import java.util.List;
 
 @Entity
 @Table(name = "patients")
@@ -18,6 +17,8 @@ public class Patient {
     @JoinColumn(name = "userID", nullable = false, unique = true)
     private User user;
 
+    private String patientCode;
+
     @Temporal(TemporalType.DATE)
     @DateTimeFormat(pattern = "yyyy-MM-dd")
     private Date dob;
@@ -26,6 +27,6 @@ public class Patient {
 
     private String ethnicity;
 
-    //Validation data
-
+    @Column(nullable = false)
+    private boolean deleted = false;
 }

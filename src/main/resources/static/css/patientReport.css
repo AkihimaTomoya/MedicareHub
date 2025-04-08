@@ -235,8 +235,8 @@ ul {
     transition: background-color 0.3s, color 0.3s;
 }
 .active{
-    background-color: #DBE8FE;
-    color: #4200FF;
+    background-color: #e6eaff;
+    color: #4c00FF;
 }
 .btn-sidebar i {
     color: #4c00ff;

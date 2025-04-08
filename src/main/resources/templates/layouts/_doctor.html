@@ -6,10 +6,11 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Medical Hub - Doctor</title>
-    <link rel="stylesheet" th:href="@{/css/patientLogin.css}" />
+    <link rel="stylesheet" th:href="@{/css/login.css}" />
     <link rel="shortcuticon" th:href="@{/images/fav-icon.png}" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css" />
     <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@300;400;500;700&display=swap" rel="stylesheet" />
     <script src="https://kit.fontawesome.com/38ea0ae7ae.js" crossorigin="anonymous"></script>
     <script th:src="@{/js/homepage.js}"></script>
@@ -19,11 +20,11 @@
 <!-- Navbar & Hero Header -->
 <section id="hero">
     <nav class="navigation">
-        <a href="#" class="logo"><span>Medical</span>Hub</a>
+        <a th:href="@{/doctor/home}" class="logo"><span>Medical</span>Hub</a>
         <ul class="menu">
-            <li><a href="#" onclick="smoothScroll(event, '')">Trang chủ</a></li>
-            <li><a href="#our_story" onclick="smoothScroll(event, 'our_story')">Giới thiệu</a></li>
-            <li><a href="#support-contact" onclick="smoothScroll(event, 'support-contact')">Liên hệ</a></li>
+            <li><a th:href="@{/doctor/home}" onclick="smoothScroll(event, '')">Trang chủ</a></li>
+            <li><a th:href="@{/patient/home#our_story}" onclick="smoothScroll(event, 'our_story')">Giới thiệu</a></li>
+            <li><a th:href="@{/patient/home#support-contact}" onclick="smoothScroll(event, 'support-contact')">Liên hệ</a></li>
         </ul>
         <!-- Nút Username -->
         <div class="user-menu-container">
@@ -36,10 +37,10 @@
                     <div>Xin chào, <br /><strong th:text="${doctor.user.fullName}">Tên người dùng</strong></div>
                 </div>
                 <hr />
-                <a th:href="@{/patient-booking}">
+                <a th:href="@{/doctor/patient-list}">
                     <i class="fa-solid fa-stethoscope"></i> Khám chữa bệnh
                 </a>
-                <a th:href="@{/patient-report}">
+                <a th:href="@{/doctor/schedule}">
                     <i class="fa-solid fa-circle-info"></i> Lịch trực
                 </a>
                 <a th:href="@{/auth/logout}" class="logout">

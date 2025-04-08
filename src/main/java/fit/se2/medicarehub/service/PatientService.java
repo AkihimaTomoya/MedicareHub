@@ -11,6 +11,10 @@ import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
+import java.util.Date;
+import java.util.Optional;
+import java.util.UUID;
+
 @Service
 public class PatientService {
     @Autowired
@@ -31,20 +35,35 @@ public class PatientService {
         return patientRepository.findByUser_Email(email);
     }
 
-    public void deleteCurrentPatientRecord(){
+    public void hideCurrentPatientById(Long patientId) {
         Patient patient = getCurrentPatient();
         if (patient != null) {
-            patientRepository.delete(patient);
+            patient.setDeleted(true);
+            patientRepository.save(patient);
         }
     }
     public Patient createPatient(Patient patient) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
-        User user = userRepository.findByEmail(email);
-        patient.setUser(user);
+        Optional<User> user = userRepository.findByEmail(email);
+        patient.setUser(user.get());
+
+        String patientCode = "BN" + UUID.randomUUID().toString().substring(0, 4).toUpperCase();
+        patient.setPatientCode(patientCode);
         return patientRepository.save(patient);
     }
 
     public Patient updatePatient(Patient patient) {
         return patientRepository.save(patient);
     }
+
+    public Optional<Patient> findByPatientCode(String patientCode) {
+        Optional<Patient> patient = patientRepository.findByPatientCode(patientCode);
+        patient.ifPresent(p -> p.setDeleted(false));
+        return patient;
+    }
+
+    public Optional<Patient> findByFullNamePhoneDobGender(String fullName, String phoneNumber, Date dob, String gender) {
+        return patientRepository.findByUserFullNameAndPhoneNumberAndDobAndGender(fullName, phoneNumber, dob, gender);
+    }
+
 }

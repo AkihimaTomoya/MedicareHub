@@ -1,36 +1,39 @@
 package fit.se2.medicarehub.controller;
 
-import fit.se2.medicarehub.model.Patient;
-import fit.se2.medicarehub.model.User;
+import fit.se2.medicarehub.model.*;
 import fit.se2.medicarehub.repository.AppointmentRepository;
-import fit.se2.medicarehub.repository.PatientRepository;
-import fit.se2.medicarehub.repository.UserRepository;
+import fit.se2.medicarehub.repository.ScheduleRepository;
+import fit.se2.medicarehub.repository.SpecialtyRepository;
+import fit.se2.medicarehub.service.AdminService;
 import fit.se2.medicarehub.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.core.Authentication;
-import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.ModelAttribute;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.*;
+
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 @Controller
 @RequestMapping("/patient")
 public class PatientController {
+    @Autowired
+    private AdminService adminService;
 
     @Autowired
-    PatientService patientService;
+    private PatientService patientService;
 
     @Autowired
-    PatientRepository patientRepository;
+    private AppointmentRepository appointmentRepository;
 
     @Autowired
-    UserRepository userRepository;
+    private SpecialtyRepository specialtyRepository;
 
     @Autowired
-    AppointmentRepository appointmentRepository;
+    private ScheduleRepository scheduleRepository;
 
     @GetMapping("/")
     public String route() {
@@ -43,26 +46,21 @@ public class PatientController {
         if (patient == null) {
             patient = new Patient();
             patient.setUser(new User());
+
         }
         model.addAttribute("patient", patient);
         return "patient/home";
     }
 
-    @GetMapping("/booking")
-    public String booking(Model model) {
-        Patient patient = patientService.getCurrentPatient();
-        model.addAttribute("patient", patient);
-        return "patient/booking";
-    }
     @GetMapping("/report")
-    public String record(Model model) {
+    public String report(Model model) {
         Patient patient = patientService.getCurrentPatient();
         model.addAttribute("patient", patient);
         return "patient/report";
     }
 
     @GetMapping("/create-report")
-    public String createRecord(Model model) {
+    public String createReport(Model model) {
         if (patientService.getCurrentPatient() != null) {
             return "redirect:/patient/report";
         }
@@ -70,8 +68,23 @@ public class PatientController {
         return "patient/create-report";
     }
 
+    @GetMapping("/have-report")
+    public String haveReport(@RequestParam(value = "code", required = false) String code, Model model) {
+        if (code != null && !code.isEmpty()) {
+            Optional<Patient> optionalPatient = patientService.findByPatientCode(code);
+            if (optionalPatient.isPresent()) {
+                Patient patient = optionalPatient.get();
+                patientService.updatePatient(patient);
+                model.addAttribute("patient", patient);
+            } else {
+                model.addAttribute("notFound", true);
+            }
+        }
+        return "patient/have-report";
+    }
+
     @GetMapping("/update-report")
-    public String updateRecord(Model model) {
+    public String updateReport(Model model) {
         Patient patient = patientService.getCurrentPatient();
         if (patient == null) {
             return "redirect:/patient/create-report";
@@ -81,7 +94,7 @@ public class PatientController {
     }
 
     @PostMapping("/save-report")
-    public String saveRecord(@ModelAttribute("patient") Patient patientForm) {
+    public String saveReport(@ModelAttribute("patient") Patient patientForm) {
         Patient existing = patientService.getCurrentPatient();
         if (existing != null) {
             // Cập nhật thông tin Patient
@@ -104,13 +117,287 @@ public class PatientController {
         }
         return "redirect:/patient/report";
     }
-
     @GetMapping("/delete-report")
-    public String deleteRecord() {
-        patientService.deleteCurrentPatientRecord();
+    public String deleteRecord(@RequestParam(value = "patientId", required = false) Long patientId) {
+        if (patientId != null) {
+            patientService.hideCurrentPatientById(patientId);
+        }
         return "redirect:/patient/report";
     }
 
+    @GetMapping("/appointment-list")
+    public String listAppointments(Model model) {
+        Patient patient = patientService.getCurrentPatient();
+        if (patient == null) {
+            model.addAttribute("error", "Vui lòng tạo hồ sơ");
+            return "redirect:/patient/report";
+        }
+        List<Appointment> appointments = appointmentRepository.findAppointmentsByPatient(patient.getPatientID());
+
+        Map<Long, AppointmentDTO> appointmentMap = new LinkedHashMap<>();
+        for (Appointment appointment : appointments) {
+            if (appointment.getStatus() == AppointmentStatus.CONFIRMED || appointment.getStatus() == AppointmentStatus.PENDING) {
+                AppointmentDTO appointmentDTO = new AppointmentDTO();
+                appointmentDTO.setSpecialtyName(appointment.getDoctor().getSpecialty().getSpecialtyName());
+                appointmentDTO.setDoctorAcademicDegree(appointment.getDoctor().getAcademicDegree().name());
+                appointmentDTO.setDoctorName(appointment.getDoctor().getUser().getFullName());
+                appointmentDTO.setAppointmentDate(appointment.getAppointmentDate());
+                appointmentDTO.setQueueNumber(appointment.getQueueNumber());
+                appointmentDTO.setStatusFromEnum(appointment.getStatus());
+                appointmentMap.put(appointment.getAppointmentID(), appointmentDTO);
+            }
+        }
+
+        model.addAttribute("appointmentMap", appointmentMap);
+        return "patient/appointment-list";
+    }
 
 
+    @GetMapping("/appointment-list/detail")
+    public String appointmentDetail(@RequestParam(value = "appointmentId", required = false) Long appointmentId, Model model) {
+        Patient patient = patientService.getCurrentPatient();
+        if (patient == null) {
+            model.addAttribute("error", "Vui lòng tạo hồ sơ");
+            return "redirect:/patient/report";
+        }
+
+        if (appointmentId == null) {
+            model.addAttribute("error", "Thông tin lịch hẹn không hợp lệ");
+            return "redirect:/patient/appointment-list";
+        }
+
+        Optional<Appointment> optionalAppointment = appointmentRepository.findById(appointmentId);
+        if (optionalAppointment.isEmpty()) {
+            model.addAttribute("error", "Không tìm thấy lịch hẹn");
+            return "redirect:/patient/appointment-list";
+        }
+
+        Appointment appointment = optionalAppointment.get();
+        // Kiểm tra xem lịch hẹn có thuộc về bệnh nhân hiện tại không
+        if (!appointment.getPatient().getPatientID().equals(patient.getPatientID())) {
+            model.addAttribute("error", "Bạn không có quyền xem lịch hẹn này");
+            return "redirect:/patient/appointment-list";
+        }
+
+        model.addAttribute("appointment", appointment);
+        return "patient/detail-appointment";
+    }
+
+
+    @GetMapping("/booking")
+    public String booking(Model model) {
+        Patient patient = patientService.getCurrentPatient();
+        model.addAttribute("patient", patient);
+        return "patient/booking";
+    }
+
+    @GetMapping("/create-appointment")
+    public String showDoctorList(
+            @RequestParam(value = "fullName", defaultValue = "") String fullName,
+            @RequestParam(value = "academicDegree", required = false) DoctorDegree academicDegree,
+            @RequestParam(value = "specialty", required = false) Long specialtyId,
+            @RequestParam(value = "sortField", defaultValue = "fullName") String sortField,
+            @RequestParam(value = "sortDir", defaultValue = "asc") String sortDir,
+            @RequestParam(value = "enabled", required = false) Boolean enabled,
+            @RequestParam(value = "page", defaultValue = "0") int page,
+            Model model) {
+        final int pageSize = 5;
+
+        Page<Doctor> doctors = adminService.getAllDoctors(
+                fullName, academicDegree, specialtyId, enabled, sortField, sortDir, PageRequest.of(page, pageSize));
+
+        Map<Long, List<Schedule>> doctorSchedules = new HashMap<>();
+        Map<Long, String> minDates = new HashMap<>();
+        Map<Long, String> maxDates = new HashMap<>();
+
+        for (Doctor doctor : doctors.getContent()) {
+            List<Schedule> schedules = adminService.getSchedulesByDoctorId(doctor.getDoctorID());
+            doctorSchedules.put(doctor.getDoctorID(), schedules);
+
+            if (!schedules.isEmpty()) {
+                // Sắp xếp danh sách lịch để tìm minDate và maxDate
+                schedules.sort(Comparator.comparing(Schedule::getStartTime));
+                minDates.put(doctor.getDoctorID(), new SimpleDateFormat("yyyy-MM-dd").format(schedules.get(0).getStartTime()));
+                maxDates.put(doctor.getDoctorID(), new SimpleDateFormat("yyyy-MM-dd").format(schedules.get(schedules.size() - 1).getEndTime()));
+            }
+        }
+
+        model.addAttribute("degreeList", DoctorDegree.values());
+        model.addAttribute("doctor", new Doctor());
+        model.addAttribute("academicDegree", academicDegree);
+        model.addAttribute("fullName", fullName);
+        model.addAttribute("specialtyId", specialtyId);
+        model.addAttribute("sortField", sortField);
+        model.addAttribute("sortDir", sortDir);
+        model.addAttribute("page", page);
+        model.addAttribute("pages", doctors.getTotalPages());
+        model.addAttribute("doctors", doctors.getContent());
+        model.addAttribute("specialty", specialtyRepository.findAll());
+        model.addAttribute("doctorSchedules", doctorSchedules);
+        model.addAttribute("minDates", minDates);
+        model.addAttribute("maxDates", maxDates);
+
+        return "patient/create-appointment";
+    }
+
+
+    @PostMapping("/create-appointment")
+    public String createAppointment(@RequestParam("doctorID") Long doctorId,
+                                    @RequestParam("appointmentDate")
+                                    @DateTimeFormat(pattern = "yyyy-MM-dd") Date appointmentDate,
+                                    Model model) {
+        Patient patient = patientService.getCurrentPatient();
+        if (patient == null) {
+            model.addAttribute("error", "Vui lòng tạo hồ sơ");
+            //Hiện thêm popup thông báo nếu có
+            return "redirect:/patient/report";
+        }
+
+        List<Appointment> existingPatientAppointments = appointmentRepository
+                .findAppointmentByPatientDoctorAndDate(patient.getPatientID(), doctorId, appointmentDate);
+        if (!existingPatientAppointments.isEmpty()) {
+            model.addAttribute("error", "Bạn đã có lịch hẹn với bác sĩ này vào thời gian đã chọn.");
+            return "patient/booking";
+        }
+
+        // Tạo appointment ở trạng thái PENDING
+        Appointment appointment = new Appointment();
+        Doctor doctor = adminService.getDoctorById(doctorId);
+        appointment.setDoctor(doctor);
+        appointment.setPatient(patient);
+        appointment.setAppointmentDate(appointmentDate);
+        appointment.setStatus(AppointmentStatus.PENDING); // Tạm thời là PENDING
+        appointment.setCreatedAt(new Date());
+
+        appointmentRepository.save(appointment);
+
+        // Chuyển sang trang xem thông tin trước khi xác nhận
+        return "redirect:/patient/preview-appointment?appointmentId=" + appointment.getAppointmentID();
+    }
+
+    @GetMapping("/preview-appointment")
+    public String previewAppointment(@RequestParam(value = "appointmentId", required = false) Long appointmentId,
+                                     Model model) {
+        Patient patient = patientService.getCurrentPatient();
+        if (patient == null) {
+            return "redirect:/patient/create-report";
+        }
+        if (appointmentId != null) {
+            Optional<Appointment> optional = appointmentRepository.findById(appointmentId);
+            if (optional.isPresent()) {
+                Appointment appointment = optional.get();
+                if (!appointment.getPatient().getPatientID().equals(patient.getPatientID()) ||
+                        appointment.getStatus() != AppointmentStatus.PENDING) {
+                    model.addAttribute("error", "Lịch hẹn này không thể xác nhận.");
+                    return "redirect:/patient/appointment-list";
+                }
+                AppointmentDTO dto = new AppointmentDTO();
+                dto.setDoctorAcademicDegree(appointment.getDoctor().getAcademicDegree().name());
+                dto.setDoctorName(appointment.getDoctor().getUser().getFullName());
+                dto.setSpecialtyName(appointment.getDoctor().getSpecialty().getSpecialtyName());
+                dto.setAppointmentDate(appointment.getAppointmentDate());
+                dto.setStatusFromEnum(appointment.getStatus());
+                dto.setStatusFromEnum(appointment.getStatus());
+
+                model.addAttribute("appointment", dto);
+                model.addAttribute("appointmentId", appointmentId);
+            }
+        }
+        model.addAttribute("patient", patient);
+        return "patient/preview-appointment";
+    }
+
+    @PostMapping("/preview-appointment")
+    public String deletePreviewAppointment(@RequestParam("appointmentId") Long appointmentId, Model
+                                           model) {appointmentRepository.deleteById(appointmentId);
+
+        Patient patient = patientService.getCurrentPatient();
+        model.addAttribute("patient", patient);
+
+        return "patient/preview-appointment";
+    }
+
+    @PostMapping("/confirm-appointment")
+    public String confirmAppointment(@RequestParam("appointmentId") Long appointmentId,
+                                     Model model) {
+        Patient patient = patientService.getCurrentPatient();
+        if (patient == null) {
+            model.addAttribute("error", "Vui lòng tạo hồ sơ");
+            return "redirect:/patient/report";
+        }
+
+        Optional<Appointment> optional = appointmentRepository.findById(appointmentId);
+        if (optional.isEmpty()) {
+            model.addAttribute("error", "Không tìm thấy lịch hẹn.");
+            return "patient/booking";
+        }
+
+        Appointment appointment = optional.get();
+
+        // Kiểm tra xem appointment này có còn PENDING không
+        if (appointment.getStatus() != AppointmentStatus.PENDING) {
+            model.addAttribute("error", "Lịch hẹn này đã được xác nhận hoặc không còn ở trạng thái chờ.");
+            return "patient/booking";
+        }
+
+        // Kiểm tra xem bác sĩ đã đủ lượt trong cùng thời điểm chưa
+        List<Appointment> doctorAppointments = appointmentRepository.findAppointmentsByDoctorAndDate(
+                appointment.getDoctor().getDoctorID(),
+                appointment.getAppointmentDate()
+        );
+        List<Schedule> schedules = scheduleRepository.findSchedulesByDoctorDoctorID(appointment.getDoctor().getDoctorID());
+        Schedule validSchedule = schedules.stream()
+                .filter(schedule -> !appointment.getAppointmentDate().before(schedule.getStartTime())
+                        && !appointment.getAppointmentDate().after(schedule.getEndTime()))
+                .findFirst().orElse(null);
+
+        if (validSchedule != null) {
+            int seatCount = validSchedule.getSeatCount();
+            if (doctorAppointments.size() >= seatCount) {
+                model.addAttribute("error", "Lịch hẹn của bác sĩ đã đầy trong khoảng thời gian này.");
+                return "patient/booking";
+            }
+        } else {
+            model.addAttribute("error", "Không tìm thấy lịch làm việc phù hợp cho bác sĩ.");
+            return "patient/booking";
+        }
+
+        appointment.setStatus(AppointmentStatus.CONFIRMED);
+        appointment.setCreatedAt(new Date());
+        appointment.setQueueNumber(doctorAppointments.size());
+        appointmentRepository.save(appointment);
+
+        return "redirect:/patient/appointment-list";
+    }
+
+    @GetMapping("/record")
+    public String listRecord(Model model) {
+        Patient patient = patientService.getCurrentPatient();
+        if (patient == null) {
+            model.addAttribute("error", "Vui lòng tạo hồ sơ");
+            return "redirect:/patient/report";
+        }
+        List<Appointment> appointments = appointmentRepository.findAppointmentsByPatient(patient.getPatientID());
+
+        Map<Long, AppointmentDTO> appointmentMap = new LinkedHashMap<>();
+        for (Appointment appointment : appointments) {
+            if (appointment.getStatus() == AppointmentStatus.COMPLETED || appointment.getStatus() == AppointmentStatus.CANCELED) {
+                AppointmentDTO appointmentDTO = new AppointmentDTO();
+                appointmentDTO.setSpecialtyName(appointment.getDoctor().getSpecialty().getSpecialtyName());
+                appointmentDTO.setDoctorAcademicDegree(appointment.getDoctor().getAcademicDegree().name());
+                appointmentDTO.setDoctorName(appointment.getDoctor().getUser().getFullName());
+                appointmentDTO.setAppointmentDate(appointment.getAppointmentDate());
+                appointmentDTO.setQueueNumber(appointment.getQueueNumber());
+                appointmentDTO.setStatusFromEnum(appointment.getStatus());
+                appointmentMap.put(appointment.getAppointmentID(), appointmentDTO);
+            }
+        }
+
+        model.addAttribute("appointmentMap", appointmentMap);
+        return "patient/history";
+    }
+
+//có thể thêm phần xem chi tiết medical record dựa vào appointment để tìm doctor và patient rồi truy xuất tới medical record
+
+    //Đặt reminder
 }
