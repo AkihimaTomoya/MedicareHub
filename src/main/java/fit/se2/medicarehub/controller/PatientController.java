@@ -2,7 +2,6 @@ package fit.se2.medicarehub.controller;
 
 import fit.se2.medicarehub.model.*;
 import fit.se2.medicarehub.repository.AppointmentRepository;
-import fit.se2.medicarehub.repository.MedicationReminderRepository;
 import fit.se2.medicarehub.repository.ScheduleRepository;
 import fit.se2.medicarehub.repository.SpecialtyRepository;
 import fit.se2.medicarehub.service.AdminService;
@@ -416,7 +415,6 @@ public class PatientController {
 
     @GetMapping("/reminder/{id}")
     public String reminder(@PathVariable long id, Model model) {
-        Patient patient = patientService.getCurrentPatient();
         MedicalRecord medicalRecord = adminService.getMedicalRecordById(id);
 
         model.addAttribute("medicalRecord", medicalRecord);

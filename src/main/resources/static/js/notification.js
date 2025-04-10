@@ -16,8 +16,7 @@ document.addEventListener("DOMContentLoaded", () => {
     document.querySelectorAll(".reminder-btn").forEach(btn => {
         btn.addEventListener("click", e => {
             e.stopPropagation();
-            const prescriptionId = btn.getAttribute("data-prescription-id");
-            prescriptionInput.value = prescriptionId;
+            prescriptionInput.value = btn.getAttribute("data-prescription-id");
             setReminderMinTime(); // Gọi khi mở popup
             popup.classList.remove("hidden");
         });

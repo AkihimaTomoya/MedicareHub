@@ -2,14 +2,11 @@ package fit.se2.medicarehub.controller;
 
 import fit.se2.medicarehub.model.Role;
 import fit.se2.medicarehub.model.UserDTO;
-import fit.se2.medicarehub.repository.PatientRepository;
 import fit.se2.medicarehub.repository.RoleRepository;
 import fit.se2.medicarehub.repository.UserRepository;
 import fit.se2.medicarehub.service.EmailService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
@@ -46,9 +43,6 @@ public class AuthController {
 
     @Autowired
     private EmailService emailService;
-
-    @Autowired
-    private JavaMailSender mailSender;
 
 
     // Endpoint đăng ký: tạo user với role PATIENT
