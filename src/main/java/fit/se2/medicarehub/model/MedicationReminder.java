@@ -13,6 +13,9 @@ public class MedicationReminder {
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long reminderID;
 
+    @Column(name = "prescription_id")
+    private Long prescriptionId;
+
     @ManyToOne
     @JoinColumn(name = "patientID", nullable = false)
     private Patient patient;
@@ -22,5 +25,7 @@ public class MedicationReminder {
     @Temporal(TemporalType.TIMESTAMP)
     private Date reminderTime;
 
-    private String dosage;  //Liểu lượng
+    private String dosage;
+
+    private boolean reminderStatus = false;
 }

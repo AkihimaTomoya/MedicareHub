@@ -2,19 +2,23 @@ package fit.se2.medicarehub.controller;
 
 import fit.se2.medicarehub.model.*;
 import fit.se2.medicarehub.repository.AppointmentRepository;
+import fit.se2.medicarehub.repository.MedicationReminderRepository;
 import fit.se2.medicarehub.repository.ScheduleRepository;
 import fit.se2.medicarehub.repository.SpecialtyRepository;
 import fit.se2.medicarehub.service.AdminService;
+import fit.se2.medicarehub.service.EmailService;
 import fit.se2.medicarehub.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
 import java.util.*;
 
 @Controller
@@ -34,6 +38,9 @@ public class PatientController {
 
     @Autowired
     private ScheduleRepository scheduleRepository;
+
+    @Autowired
+    private EmailService emailService;
 
     @GetMapping("/")
     public String route() {
@@ -399,5 +406,76 @@ public class PatientController {
 
 //có thể thêm phần xem chi tiết medical record dựa vào appointment để tìm doctor và patient rồi truy xuất tới medical record
 
-    //Đặt reminder
+    @GetMapping("/reminder")
+    public String reminder(Model model) {
+        Patient patient = patientService.getCurrentPatient();
+        List<MedicalRecord> records = adminService.searchMedicalRecordsByPatient(patient);
+        model.addAttribute("records", records);
+        return "patient/reminder";
+    }
+
+    @GetMapping("/reminder/{id}")
+    public String reminder(@PathVariable long id, Model model) {
+        Patient patient = patientService.getCurrentPatient();
+        MedicalRecord medicalRecord = adminService.getMedicalRecordById(id);
+
+        model.addAttribute("medicalRecord", medicalRecord);
+        return "patient/reminder-detail";
+    }
+
+    @PostMapping("/reminder/notification")
+    public String reminderNotification(@RequestParam Long id,
+                                       @RequestParam Long prescriptionId,
+                                       @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime reminderTime,
+                                       Model model) {
+
+        MedicalRecord medicalRecord = adminService.getMedicalRecordById(id);
+        Patient patient = patientService.getCurrentPatient();
+
+        Prescription targetPrescription = medicalRecord.getPrescriptions()
+                .stream()
+                .filter(p -> p.getPrescriptionID().equals(prescriptionId))
+                .findFirst()
+                .orElseThrow(() -> new IllegalArgumentException("Prescription not found"));
+
+        MedicationReminder reminder = new MedicationReminder();
+        reminder.setPatient(patient);
+        reminder.setPrescriptionId(targetPrescription.getPrescriptionID());
+        reminder.setMedicationName(targetPrescription.getMedicineName());
+        reminder.setDosage(targetPrescription.getInstruction());
+        reminder.setReminderTime(java.sql.Timestamp.valueOf(reminderTime));
+        reminder.setReminderStatus(true);
+
+        patientService.updateMedicationReminder(reminder);
+
+        model.addAttribute("notification", "Lịch nhắc uống thuốc đã được lưu.");
+        return "redirect:/patient/reminder/" + id;
+    }
+
+
+    @Scheduled(fixedRate = 60000)
+    public void processMedicationReminders() {
+        Date now = new Date();
+        List<MedicationReminder> dueReminders = patientService.dueReminders(now);
+
+        for (MedicationReminder reminder : dueReminders) {
+            if (reminder.isReminderStatus()) {
+                String email = reminder.getPatient().getUser().getEmail();
+                String subject = "Nhắc nhở uống thuốc: " + reminder.getMedicationName();
+                String message = "Bạn cần sử dụng thuốc " + reminder.getMedicationName()
+                        + ". Hướng dẫn: " + reminder.getDosage();
+
+                emailService.sendEmail(email, subject, message);
+                reminder.setReminderStatus(false);
+                patientService.updateMedicationReminder(reminder);
+
+                Optional<Prescription> p = patientService.findPrescriptionById(reminder.getPrescriptionId());
+                if (p.isPresent()) {
+                    p.get().setReminder(false);
+                    patientService.updatePrescription(p.get());
+                }
+            }
+        }
+    }
+
 }

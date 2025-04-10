@@ -37,9 +37,15 @@
             </button>
           </a>
 
-          <a href="history.html">
+          <a th:href="@{/patient/history}">
             <button class="btn-sidebar active">
               <i class="fa-solid fa-calendar-days"></i> Lịch sử khám bệnh
+            </button>
+          </a>
+
+          <a th:href="@{/patient/reminder}">
+            <button class="btn-sidebar">
+              <i class="fa-solid fa-bell"></i> Thông báo
             </button>
           </a>
         </div>
@@ -47,26 +53,28 @@
           <div class="record-wrapper">
             <div class="patient-name-header" th:text="${#authentication.principal.fullName}"></div>
             <div th:each="entry : ${appointmentMap}">
-              <div class="record-card"
-                   th:onclick="|window.location.href='@{${redirectUrl}}'|"
-                   style="cursor: pointer;">
-                <div class="record-info">
-                  <p><i class="fa-solid fa-heart-circle-plus"></i> Chuyên khoa:
-                    <span th:text="${entry.value.specialtyName}"></span>
-                  </p>
-                  <p><i class="fa-solid fa-user"></i>
-                    <span class="doctor-name" th:text="${entry.value.doctorAcademicDegree}"></span>
-                    <span class="doctor-name" th:text="${entry.value.doctorName}"></span>
-                  </p>
-                  <p><i class="fa-solid fa-calendar-days"></i> Ngày khám:
-                    <span th:text="${#dates.format(entry.value.appointmentDate, 'dd/MM/yyyy')}"></span>
-                  </p>
-                  <p><i class="fa-solid fa-chart-bar"></i> Số thứ tự:
-                    <span th:text="${entry.value.queueNumber}"></span>
-                  </p>
-                  <p><i class="fa-solid fa-circle-check"></i> Trạng thái:
-                    <span class="status not-checked" th:text="${entry.value.status}"></span>
-                  </p>
+              <div class="records">
+                <div class="record-card"
+                     th:onclick="|window.location.href='@{${redirectUrl}}'|"
+                     style="cursor: pointer;">
+                  <div class="record-info">
+                    <p><i class="fa-solid fa-heart-circle-plus"></i> Chuyên khoa:
+                      <span th:text="${entry.value.specialtyName}"></span>
+                    </p>
+                    <p><i class="fa-solid fa-user"></i>
+                      <span class="doctor-name" th:text="${entry.value.doctorAcademicDegree}"></span>
+                      <span class="doctor-name" th:text="${entry.value.doctorName}"></span>
+                    </p>
+                    <p><i class="fa-solid fa-calendar-days"></i> Ngày khám:
+                      <span th:text="${#dates.format(entry.value.appointmentDate, 'dd/MM/yyyy')}"></span>
+                    </p>
+                    <p><i class="fa-solid fa-chart-bar"></i> Số thứ tự:
+                      <span th:text="${entry.value.queueNumber}"></span>
+                    </p>
+                    <p><i class="fa-solid fa-circle-check"></i> Trạng thái:
+                      <span class="status not-checked" th:text="${entry.value.status}"></span>
+                    </p>
+                  </div>
                 </div>
               </div>
             </div>

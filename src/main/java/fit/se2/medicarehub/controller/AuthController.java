@@ -5,6 +5,7 @@ import fit.se2.medicarehub.model.UserDTO;
 import fit.se2.medicarehub.repository.PatientRepository;
 import fit.se2.medicarehub.repository.RoleRepository;
 import fit.se2.medicarehub.repository.UserRepository;
+import fit.se2.medicarehub.service.EmailService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.SimpleMailMessage;
@@ -44,7 +45,7 @@ public class AuthController {
     private RoleRepository roleRepository;
 
     @Autowired
-    private PatientRepository patientRepository;
+    private EmailService emailService;
 
     @Autowired
     private JavaMailSender mailSender;
@@ -176,18 +177,12 @@ public class AuthController {
         user.setUUID(token);
         userRepository.save(user);
 
-        String resetPasswordUrl = getAppUrl(request) + "/reset-password?token=" + token;
+        String resetPasswordUrl = getAppUrl(request) + "/auth/reset-password?token=" + token;
 
-        // Gửi email xác nhận reset mật khẩu sử dụng Mailtrap
-        SimpleMailMessage mailMessage = new SimpleMailMessage();
-        mailMessage.setTo(user.getEmail());
-        mailMessage.setSubject("Password Reset Confirmation");
-        mailMessage.setText("To reset your password, please click on the link below:\n" + resetPasswordUrl);
-        mailMessage.setFrom("noreply@example.com");
-        mailSender.send(mailMessage);
+        emailService.sendEmail(user.getEmail(), "Reset Password Link", "To reset your password, please click on the link below:\n" + resetPasswordUrl);
 
         model.addAttribute("message", "Password reset successfully. Please check your email for confirmation.");
-        return "homepage";
+        return "redirect:/home";
     }
 
     private String getAppUrl(HttpServletRequest request) {

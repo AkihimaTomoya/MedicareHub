@@ -321,4 +321,8 @@ public class AdminService {
         return appointmentRepository.findAppointmentByPatientDoctorAndDate(patientID, doctorID, appointmentDate);
     }
 
+    public List<MedicalRecord> searchMedicalRecordsByPatient(Patient patient) {
+        return medicalRecordRepository.findAllByPatientOrderByExaminationDateDesc(patient);
+    }
+
 }

@@ -1,17 +1,17 @@
 package fit.se2.medicarehub.service;
 
+import fit.se2.medicarehub.model.MedicationReminder;
 import fit.se2.medicarehub.model.Patient;
+import fit.se2.medicarehub.model.Prescription;
 import fit.se2.medicarehub.model.User;
-import fit.se2.medicarehub.repository.AppointmentRepository;
-import fit.se2.medicarehub.repository.MedicationReminderRepository;
-import fit.se2.medicarehub.repository.PatientRepository;
-import fit.se2.medicarehub.repository.UserRepository;
+import fit.se2.medicarehub.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
 
 import java.util.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -24,7 +24,7 @@ public class PatientService {
     private PatientRepository patientRepository;
 
     @Autowired
-    private AppointmentRepository appointmentRepository;
+    private PrescriptionRepository prescriptionRepository;
 
     @Autowired
     private MedicationReminderRepository medicationReminderRepository;
@@ -62,8 +62,19 @@ public class PatientService {
         return patient;
     }
 
-    public Optional<Patient> findByFullNamePhoneDobGender(String fullName, String phoneNumber, Date dob, String gender) {
-        return patientRepository.findByUserFullNameAndPhoneNumberAndDobAndGender(fullName, phoneNumber, dob, gender);
+    public Prescription updatePrescription(Prescription prescription) {
+        return prescriptionRepository.save(prescription);
     }
 
+    public Optional<Prescription> findPrescriptionById(Long prescriptionId) {
+        return prescriptionRepository.findById(prescriptionId);
+    }
+
+    public List<MedicationReminder> dueReminders (Date now) {
+        return medicationReminderRepository.findByReminderTimeBefore(now);
+    }
+
+    public MedicationReminder updateMedicationReminder(MedicationReminder reminder) {
+        return medicationReminderRepository.save(reminder);
+    }
 }

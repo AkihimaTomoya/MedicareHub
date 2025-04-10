@@ -28,4 +28,6 @@ public class Prescription {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "recordID", nullable = false)
     private MedicalRecord record;
+
+    private boolean reminder = false;
 }
