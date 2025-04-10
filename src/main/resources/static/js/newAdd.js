@@ -107,15 +107,16 @@ function clearErrors() {
 
 // Đóng modal khi bấm ngoài vùng modal
 window.onclick = function (event) {
-    const modal = document.getElementById("add");
-    if (modal && !modal.contains(event.target)) {
-        hideForm();
-    }
-    const edit = document.getElementById("edit");
-    if (edit && !edit.contains(event.target)) {
+    const modalAdd = document.getElementById("add");
+    const modalEdit = document.getElementById("edit");
+    if (
+        (!modalAdd || !modalAdd.contains(event.target)) &&
+        (!modalEdit || !modalEdit.contains(event.target))
+    ) {
         hideForm();
     }
 };
+
 
 document.addEventListener("DOMContentLoaded", function () {
     const scheduleDateInput = document.getElementById("startDate");
