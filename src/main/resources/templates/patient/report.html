@@ -54,7 +54,7 @@
         <div class="patient-content">
           <h2>Hồ sơ bệnh nhân</h2>
           <!-- Nếu patient tồn tại thì hiển thị profile card -->
-          <div th:if="${patient != null}" class="profile-card">
+          <div th:if="${patient != null and !patient.deleted}" class="profile-card">
             <div class="profile-item">
               <i class="fa-solid fa-user"></i>
               <span class="label">Họ và tên:</span>
@@ -90,7 +90,7 @@
               <button type="button"
                       class="delete-btn button"
                       th:attr="data-id=${patient.patientID}">
-                <i class="fa-solid fa-trash"></i> Xóa hồ <sơ></sơ>
+                <i class="fa-solid fa-trash"></i> Xóa hồ sơ
               </button>
               <a th:href="@{/patient/update-report}" class="edit-btn button"><i class="fa-solid fa-pen"></i> Chỉnh sửa</a>
               <button type="button" class="detail-btn button">

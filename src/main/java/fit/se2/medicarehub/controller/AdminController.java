@@ -16,6 +16,7 @@ import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.servlet.mvc.support.RedirectAttributes;
+import java.text.Normalizer;
 
 import java.text.SimpleDateFormat;
 import java.util.*;
@@ -160,7 +161,6 @@ public class AdminController {
     @PostMapping("/doctors/save")
     public String saveDoctor(@Valid @ModelAttribute("doctorDTO") DoctorDTO doctorDTO,
                              BindingResult bindingResult,
-                             @ModelAttribute("doctor") Doctor doctor,
                              @RequestParam("imageFile") MultipartFile imageFile,
                              RedirectAttributes redirectAttributes) {
 
@@ -170,11 +170,16 @@ public class AdminController {
             return "redirect:/admin/doctors?add=false";
         }
 
-
+        Doctor doctor = doctorDTO.getDoctor();
         if (doctor.getDoctorID() == null) {
             User user = doctor.getUser();
-            if (user.getFullName() != null && !user.getFullName().trim().isEmpty()) {
-                String baseEmail = user.getFullName().trim().replaceAll("\\s+", "").toLowerCase() + "@example.com";
+            if (user != null && user.getFullName() != null && !user.getFullName().trim().isEmpty()) {
+                // Chuẩn hóa và loại bỏ dấu
+                String normalizedFullName = Normalizer.normalize(user.getFullName(), Normalizer.Form.NFD)
+                        .replaceAll("\\p{InCombiningDiacriticalMarks}+", "");
+                // Loại bỏ khoảng trắng và ký tự không phải là chữ
+                String baseEmail = normalizedFullName.trim().replaceAll("\\s+", "").toLowerCase() + "@example.com";
+
                 String uniqueEmail = baseEmail;
                 int counter = 1;
                 if (userRepository.findByUsername(baseEmail).isPresent()) {

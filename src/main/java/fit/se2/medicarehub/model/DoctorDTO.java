@@ -28,4 +28,5 @@ public class DoctorDTO {
     private String academicDegree;
 
     private Doctor doctor;
+
 }

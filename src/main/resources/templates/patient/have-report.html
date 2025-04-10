@@ -20,27 +20,45 @@
         <form th:action="@{/patient/have-report}" method="get" class="search-box">
           <h3>Nhập mã số bệnh nhân</h3>
           <input type="text" name="code" placeholder="Nhập mã số bệnh nhân" th:value="${param.code}" />
-          <div th:if="${notFound}">
-            <p class="not-found-msg">Không tìm thấy hồ sơ bệnh nhân với mã đã nhập.</p>
-          </div>
           <button class="search-btn"><i class="fa-solid fa-magnifying-glass"></i> Tìm kiếm</button>
-          <div class="forgot-id" ><a th:href="@{/patient/create-report}"><i class="fa-solid fa-angle-right"></i> Tôi mất mã bệnh nhân của mình</a></div>
+          <div class="forgot-id">
+            <a th:href="@{/patient/create-report}"><i class="fa-solid fa-angle-right"></i> Tôi mất mã bệnh nhân của mình</a>
+          </div>
         </form>
 
-        <div th:if="${patient != null and patient.patientCode != null and patient.deleted}" class="patient-profile-box">
-        <div class="profile-header">
-            <h3>Hồ sơ bệnh nhân</h3>
-            <button class="close-btn">✕</button>
+        <div class="result-box">
+          <!-- Nếu tìm thấy hồ sơ -->
+          <div th:if="${patient != null and patient.patientCode != null and !patient.deleted}" class="patient-profile-box"
+               onclick="window.location.href='/patient/update-report'"
+               style="cursor: pointer;">
+            <div class="profile-header">
+              <h3>Hồ sơ bệnh nhân</h3>
+            </div>
+            <ul class="profile-details">
+              <li><i class="fa-solid fa-user"></i> <strong>Họ và tên</strong> <span th:text="${patient.user.fullName}"></span></li>
+              <li>
+                <i class="fa-solid fa-calendar-days"></i>
+                <strong>Ngày sinh</strong>
+                <span th:text="${#dates.format(patient.dob, 'dd/MM/yyyy')}"></span>
+              </li>
+              <li>
+                <i class="fa-solid fa-phone"></i>
+                <strong>Số điện thoại</strong>
+                <span th:text="${patient.user.phoneNumber.substring(patient.user.phoneNumber.length() - 3)}"
+                      th:utext="'*******' + ${patient.user.phoneNumber.substring(patient.user.phoneNumber.length() - 3)}"></span>
+              </li>
+              <li><i class="fa-solid fa-venus-mars"></i> <strong>Giới tính</strong> <span th:text="${patient.user.gender}"></span></li>
+              <li><i class="fa-solid fa-location-dot"></i> <strong>Địa chỉ</strong> <span th:text="${patient.address}"></span></li>
+              <li><i class="fa-solid fa-id-card"></i> <strong>Mã bệnh nhân</strong> <span th:text="${patient.patientCode}"></span></li>
+            </ul>
           </div>
-          <ul class="profile-details">
-            <li><i class="fa-solid fa-user"></i> <strong>Họ và tên</strong> <span th:text="${patient.fullName}"></span></li>
-            <li><i class="fa-solid fa-calendar-days"></i> <strong>Ngày sinh</strong> <span th:text="${#dates.format(patient.dateOfBirth, 'dd/MM/yyyy')}"></span></li>
-            <li><i class="fa-solid fa-phone"></i> <strong>Số điện thoại</strong> <span th:text="${patient.phoneNumber.substring(patient.phoneNumber.length() - 3)}" th:utext="'*******' + ${patient.phoneNumber.substring(patient.phoneNumber.length() - 3)}"></span></li>
-            <li><i class="fa-solid fa-venus-mars"></i> <strong>Giới tính</strong> <span th:text="${patient.gender}"></span></li>
-            <li><i class="fa-solid fa-location-dot"></i> <strong>Địa chỉ</strong> <span th:text="${patient.address}"></span></li>
-            <li><i class="fa-solid fa-id-card"></i> <strong>Mã bệnh nhân</strong> <span th:text="${patient.patientCode}"></span></li>
-          </ul>
+
+          <!-- Nếu không tìm thấy hồ sơ -->
+          <div th:if="${patient == null}" class="not-found-box">
+            <p class="not-found-msg">Không tìm thấy hồ sơ bệnh nhân với mã đã nhập.</p>
+          </div>
         </div>
+
       </div>
     </div>
 </div>

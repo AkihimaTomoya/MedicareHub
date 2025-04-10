@@ -7,6 +7,27 @@
   <title>Medical Hub - Doctor List</title>
   <link rel="stylesheet" th:href="@{/css/doctorList.css}" />
   <script th:src="@{/js/newAdd.js}"></script>
+  <script>
+    function validateDob() {
+      const dobInput = document.getElementById("dob");
+      const dobValue = dobInput.value;
+      if (!dobValue) return true;
+
+      const dob = new Date(dobValue);
+      const today = new Date();
+      let age = today.getFullYear() - dob.getFullYear();
+      const monthDiff = today.getMonth() - dob.getMonth();
+      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+        age--;
+      }
+
+      if (age < 18) {
+        alert("Ngày sinh không hợp lệ. Bác sĩ phải ít nhất 18 tuổi.");
+        return false;
+      }
+      return true;
+    }
+  </script>
 </head>
 <body>
 <div layout:fragment="content">
@@ -20,7 +41,7 @@
       <div class="modal-content">
         <span class="close" onclick="hideForm()">&times;</span>
         <h2 class="form-title">Thêm nhân viên</h2>
-        <form action="/admin/doctors/save" method="post" enctype="multipart/form-data" id="addForm" th:object="${doctorDTO}">
+        <form action="/admin/doctors/save" method="post" enctype="multipart/form-data" id="addForm" th:object="${doctorDTO}" onsubmit="return validateDob()">>
           <p class="required-note">(*) Thông tin bắt buộc</p>
           <div class="error-message" th:if="${#fields.hasErrors('doctor.user.fullName')}" th:errors="*{doctor.user.fullName}"></div>
           <input type="text" class="ideal-width" th:field="*{doctor.user.fullName}" placeholder="Họ tên *" required>
@@ -36,7 +57,7 @@
             <div class="half-width">
               <label>Ngày sinh</label>
               <div class="date-container">
-                <input type="date" th:field="*{dob}">
+                <input type="date" th:field="*{dob}" id="dob" required>
               </div>
             </div>
 

@@ -32,6 +32,26 @@
                 }
             }
         });
+
+        function validateDob() {
+            const dobInput = document.getElementById("dob");
+            const dobValue = dobInput.value;
+            if (!dobValue) return true;
+
+            const dob = new Date(dobValue);
+            const today = new Date();
+            let age = today.getFullYear() - dob.getFullYear();
+            const monthDiff = today.getMonth() - dob.getMonth();
+            if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < dob.getDate())) {
+                age--;
+            }
+
+            if (age < 18) {
+                alert("Ngày sinh không hợp lệ. Bệnh nhân phải ít nhất 18 tuổi.");
+                return false;
+            }
+            return true;
+        }
     </script>
 </head>
 <body>
@@ -39,7 +59,7 @@
     <section id="hero">
         <div class="patient-content">
             <div class="container">
-                <div class="breadcrumb">Trang chủ > Tạo hồ sơ bệnh nhân</div>
+                <div class="breadcrumb">Trang chủ > Sửa hồ sơ bệnh nhân</div>
                 <h2>Chỉnh sửa hồ sơ bệnh nhân</h2>
                 <div class="form-section">
                     <h3>NHẬP THÔNG TIN BỆNH NHÂN</h3>
@@ -47,7 +67,7 @@
                         <p>Vui lòng cung cấp thông tin chính xác để được phục vụ tốt nhất. Trường hợp cung cấp sai thông tin, việc xác nhận lịch hẹn sẽ không có hiệu lực trước khi đặt khám</p>
                     </div>
                     <p class="required-note">(*) Thông tin bắt buộc</p>
-                    <form th:action="@{/patient/save-report}" th:object="${patient}" method="post" class="patient-form" onsubmit="return combineAddress()">
+                    <form th:action="@{/patient/save-report}" th:object="${patient}" method="post" class="patient-form" onsubmit="return combineAddress() && validateDob()">
                         <div class="form-row">
                             <div class="form-group">
                                 <label>Họ và tên <span>*</span></label>
@@ -55,7 +75,7 @@
                             </div>
                             <div class="form-group">
                                 <label>Ngày sinh <span>*</span></label>
-                                <input type="date" th:field="*{dob}" />
+                                <input type="date" th:field="*{dob}" id="dob" />
                             </div>
                         </div>
 

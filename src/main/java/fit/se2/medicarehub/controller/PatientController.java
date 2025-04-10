@@ -68,7 +68,7 @@ public class PatientController {
 
     @GetMapping("/create-report")
     public String createReport(Model model) {
-        if (patientService.getCurrentPatient() != null) {
+        if (patientService.getCurrentPatient() != null && !patientService.getCurrentPatient().isDeleted()) {
             return "redirect:/patient/report";
         }
         model.addAttribute("patient", new Patient());
@@ -103,11 +103,12 @@ public class PatientController {
     @PostMapping("/save-report")
     public String saveReport(@ModelAttribute("patient") Patient patientForm) {
         Patient existing = patientService.getCurrentPatient();
-        if (existing != null) {
+        if (existing != null && !existing.isDeleted()) {
             // Cập nhật thông tin Patient
             existing.setDob(patientForm.getDob());
             existing.setAddress(patientForm.getAddress());
             existing.setEthnicity(patientForm.getEthnicity());
+            existing.setDeleted(false);
             // Cập nhật các trường trong User
             if(existing.getUser() == null) {
                 existing.setUser(patientForm.getUser());

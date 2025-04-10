@@ -240,6 +240,7 @@
     box-shadow: 0 2px 8px rgba(0,0,0,0.1);
     background-color: #fff;
     max-width: 500px;
+    width: 80%;
 }
 .profile-header {
     display: flex;
@@ -268,3 +269,7 @@
     margin-bottom: 1rem;
 }
 
+.result-box {
+    display: flex;
+    justify-content: center;
+}
