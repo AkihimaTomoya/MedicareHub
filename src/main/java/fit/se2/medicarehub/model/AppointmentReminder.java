@@ -25,4 +25,6 @@ public class AppointmentReminder {
 
     @Temporal(TemporalType.TIMESTAMP)
     private Date reminderTime;
+
+    private boolean reminderStatus = false;
 }

@@ -163,7 +163,8 @@ ul {
     flex: 1; /* Đẩy footer xuống cuối */
     display: flex;
     justify-content: center;
-    align-items: center; /* ✅ Căn giữa dọc */
+    align-items: center;
+    position: relative;
 }
 
 .ticket-container {
@@ -477,11 +478,14 @@ ul {
     left: 0;
     width: 100%;
     height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    display: none;
+    background-color: rgba(0,0,0,0.5);
+    display: flex;
     align-items: center;
     justify-content: center;
-    z-index: 999;
+}
+
+.popup-overlay.hidden {
+    display: none;
 }
 
 .popup-content {
@@ -489,6 +493,7 @@ ul {
     padding: 30px;
     border-radius: 10px;
     max-width: 400px;
+    width: 90%;
     text-align: center;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
     position: relative;
@@ -500,10 +505,28 @@ ul {
     margin-bottom: 15px;
 }
 
-.popup-content p {
-    font-size: 16px;
-    color: #333;
-    margin-bottom: 25px;
+.form-group {
+    margin-bottom: 20px;
+    text-align: left;
+}
+
+.form-group label {
+    display: block;
+    margin-bottom: 8px;
+    font-weight: 600;
+}
+
+.form-group input,
+.form-group textarea {
+    width: 100%;
+    padding: 10px;
+    border-radius: 6px;
+    border: 1px solid #ccc;
+    font-size: 14px;
+}
+
+.form-group textarea {
+    resize: none;
 }
 
 .popup-actions {
@@ -523,11 +546,32 @@ ul {
 .cancel-btn {
     background-color: #2f49b8;
     color: #fff;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    flex: 1;
+    transition: background-color 0.3s;
 }
 
-.confirm-btn {
-    background-color: #2f49b8;
-    color: #fff;
+.cancel-btn:hover {
+    background-color: #1f3ca8;
+}
+
+.submit-btn {
+    background-color: #f1f1f1;
+    border: none;
+    padding: 10px 16px;
+    border-radius: 8px;
+    font-weight: bold;
+    cursor: pointer;
+    flex: 1;
+    transition: background-color 0.3s;
+}
+
+.submit-btn:hover {
+    background-color: #e0e0e0;
 }
 
 .close-popup {
@@ -538,116 +582,18 @@ ul {
     cursor: pointer;
 }
 
-.detail-popup {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background: rgba(0, 0, 0, 0.4);
-    display: none;
-    justify-content: center;
-    align-items: center;
-    z-index: 999;
-}
 
-.detail-content {
-    background: #fff;
-    padding: 35px 30px;
-    width: 500px;
-    border-radius: 15px;
-    position: relative;
-    box-shadow: 0 8px 25px rgba(0, 0, 0, 0.2);
-    font-family: "Roboto", sans-serif;
-}
-
-.detail-content h3 {
-    color: #4c00ff;
-    font-size: 24px;
-    font-weight: 700;
-    text-align: center;
-    margin-bottom: 30px;
-}
-
-.detail-content ul {
-    list-style: none;
-    padding: 0;
-    margin: 0;
-}
-
-.detail-content li {
-    display: flex;
-    align-items: flex-start;
-    gap: 15px;
-    margin-bottom: 18px;
-    font-size: 16px;
-    color: #333;
-    line-height: 1.6;
-}
-
-.detail-content li i {
-    color: #4c00ff;
-    font-size: 20px;
-    min-width: 25px;
-    text-align: center;
-    padding-top: 2px;
-}
-
-.detail-content li span {
-    font-weight: 500;
-    color: #333;
-    min-width: 120px;
-    display: inline-block;
-}
-
-.text-purple {
-    color: #4c00ff;
-    font-weight: 600;
-}
-
-.detail-close {
+.reminder-btn {
     position: absolute;
     top: 20px;
-    right: 20px;
-    font-size: 22px;
-    color: #333;
+    right: 35%;
+    background: none;
+    border: none;
+    padding: 0;
     cursor: pointer;
-    transition: color 0.3s ease;
 }
 
-.detail-close:hover {
-    color: #4c00ff;
-}
-.detail-close {
-    position: absolute;
-    top: 18px;
-    right: 20px;
-    font-size: 26px;
-    color: #333;
-    cursor: pointer;
-    transition: color 0.3s ease;
-}
-
-.detail-close:hover {
-    color: #4c00ff;
-}
-.record-wrapper {
-    background-color: #e9f0ff;
-    padding: 20px;
-    border-radius: 10px;
-}
-.record-wrapper {
-    background-color: #e9f0ff;
-    padding: 20px;
-    border-radius: 10px;
-}
-
-.patient-name-header {
-    background-color: #4b00ff;
-    color: #fff;
-    font-weight: 700;
-    font-size: 22px;
-    padding: 15px 20px;
-    border-radius: 8px;
-    margin-bottom: 20px;
+.reminder-btn i {
+    font-size: 28px;
+    color: #3c55af;
 }

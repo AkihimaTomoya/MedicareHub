@@ -1,9 +1,6 @@
 package fit.se2.medicarehub.service;
 
-import fit.se2.medicarehub.model.MedicationReminder;
-import fit.se2.medicarehub.model.Patient;
-import fit.se2.medicarehub.model.Prescription;
-import fit.se2.medicarehub.model.User;
+import fit.se2.medicarehub.model.*;
 import fit.se2.medicarehub.repository.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
@@ -28,6 +25,8 @@ public class PatientService {
 
     @Autowired
     private MedicationReminderRepository medicationReminderRepository;
+    @Autowired
+    private AppointmentReminderRepository appointmentReminderRepository;
 
     public Patient getCurrentPatient() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
@@ -76,5 +75,21 @@ public class PatientService {
 
     public MedicationReminder updateMedicationReminder(MedicationReminder reminder) {
         return medicationReminderRepository.save(reminder);
+    }
+
+    public AppointmentReminder updateAppointmentReminder(AppointmentReminder reminder) {
+        return appointmentReminderRepository.save(reminder);
+    }
+
+    public List<AppointmentReminder> dueAppointmentReminders (Date now) {
+        return appointmentReminderRepository.findByReminderTimeLessThanEqualAndReminderStatusTrue(now);
+    }
+
+    public Optional<AppointmentReminder> findAppointmentReminderByAppointmentId(Long appointmentId) {
+        return appointmentReminderRepository.findByAppointmentId(appointmentId);
+    }
+
+    public Optional<MedicationReminder> findMedicationReminderByPrescriptionId(Long prescriptionId) {
+        return medicationReminderRepository.findByPrescriptionId(prescriptionId);
     }
 }

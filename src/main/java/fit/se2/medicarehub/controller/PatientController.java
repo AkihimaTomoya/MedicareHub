@@ -16,6 +16,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 import java.time.LocalDateTime;
 import java.util.*;
@@ -189,6 +190,74 @@ public class PatientController {
         return "patient/detail-appointment";
     }
 
+    @PostMapping("/appointment/notification")
+    public String appointmentNotification(@RequestParam("appointmentId") Long appointmentId,
+                                          @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE_TIME) LocalDateTime reminderTime,
+                                          @RequestParam String message,
+                                          Model model) {
+
+        Patient patient = patientService.getCurrentPatient();
+        if (patient == null) {
+            model.addAttribute("error", "Vui lòng tạo hồ sơ");
+            return "redirect:/patient/report";
+        }
+
+        Optional<Appointment> optionalAppointment = appointmentRepository.findById(appointmentId);
+        if (optionalAppointment.isEmpty()) {
+            model.addAttribute("error", "Không tìm thấy lịch hẹn");
+            return "redirect:/patient/appointment-list";
+        }
+
+        Appointment appointment = optionalAppointment.get();
+        // Kiểm tra xem lịch hẹn có thuộc về bệnh nhân hiện tại không
+        if (!appointment.getPatient().getPatientID().equals(patient.getPatientID())) {
+            model.addAttribute("error", "Bạn không có quyền thực hiện thao tác này");
+            return "redirect:/patient/appointment-list";
+        }
+
+        AppointmentReminder reminder;
+        if (appointment.isReminderStatus()) {
+            // Đã có nhắc hẹn => cập nhật reminder hiện có
+            reminder = patientService.findAppointmentReminderByAppointmentId(appointmentId)
+                    .orElse(new AppointmentReminder()); // fallback nếu dữ liệu lỗi
+        } else {
+            reminder = new AppointmentReminder();
+            reminder.setAppointment(appointment);
+            reminder.setPatient(patient);
+            reminder.setReminderStatus(true);
+            appointment.setReminderStatus(true);
+            appointment.setReminderStatus(true);
+            appointmentRepository.save(appointment);
+        }
+        reminder.setMessage(message);
+        reminder.setReminderTime(Timestamp.valueOf(reminderTime));
+
+        patientService.updateAppointmentReminder(reminder);
+
+        model.addAttribute("notification", "Lịch nhắc cuộc hẹn đã được lưu.");
+        return "redirect:/patient/appointment-list/detail?appointmentId=" + appointmentId;
+    }
+
+    @Scheduled(fixedRate = 6000)
+    public void processAppointmentReminders() {
+        Date now = new Date();
+        List<AppointmentReminder> dueReminders = patientService.dueAppointmentReminders(now);
+
+        for (AppointmentReminder reminder : dueReminders) {
+            String email = reminder.getPatient().getUser().getEmail();
+            String subject = "Nhắc nhở cuộc hẹn: " + reminder.getAppointment().getAppointmentDate();
+            String message = "Bạn có một cuộc hẹn vào " + reminder.getAppointment().getAppointmentDate() +
+                    ". Nội dung nhắc nhở: " + reminder.getMessage();
+
+            emailService.sendEmail(email, subject, message);
+            reminder.setReminderStatus(false);
+            patientService.updateAppointmentReminder(reminder);
+
+            Appointment appointment = reminder.getAppointment();
+            appointment.setReminderStatus(false);
+            appointmentRepository.save(appointment);
+        }
+    }
 
     @GetMapping("/booking")
     public String booking(Model model) {
@@ -403,7 +472,6 @@ public class PatientController {
         return "patient/history";
     }
 
-//có thể thêm phần xem chi tiết medical record dựa vào appointment để tìm doctor và patient rồi truy xuất tới medical record
 
     @GetMapping("/reminder")
     public String reminder(Model model) {
@@ -436,14 +504,24 @@ public class PatientController {
                 .findFirst()
                 .orElseThrow(() -> new IllegalArgumentException("Prescription not found"));
 
-        MedicationReminder reminder = new MedicationReminder();
-        reminder.setPatient(patient);
-        reminder.setPrescriptionId(targetPrescription.getPrescriptionID());
-        reminder.setMedicationName(targetPrescription.getMedicineName());
-        reminder.setDosage(targetPrescription.getInstruction());
-        reminder.setReminderTime(java.sql.Timestamp.valueOf(reminderTime));
-        reminder.setReminderStatus(true);
+        MedicationReminder reminder;
 
+        if (targetPrescription.isReminder()) {
+            reminder = patientService.findMedicationReminderByPrescriptionId(prescriptionId)
+                    .orElse(new MedicationReminder());
+        } else {
+            reminder = new MedicationReminder();
+            reminder.setPatient(patient);
+            reminder.setPrescriptionId(targetPrescription.getPrescriptionID());
+            reminder.setMedicationName(targetPrescription.getMedicineName());
+            reminder.setDosage(targetPrescription.getInstruction());
+            reminder.setReminderStatus(true);
+
+            targetPrescription.setReminder(true);
+            patientService.updatePrescription(targetPrescription);
+        }
+
+        reminder.setReminderTime(Timestamp.valueOf(reminderTime));
         patientService.updateMedicationReminder(reminder);
 
         model.addAttribute("notification", "Lịch nhắc uống thuốc đã được lưu.");

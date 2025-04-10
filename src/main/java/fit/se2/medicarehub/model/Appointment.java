@@ -35,5 +35,6 @@ public class Appointment {
     @Temporal(TemporalType.TIMESTAMP)
     private Date createdAt;
 
+    private boolean reminderStatus = false;
 
 }
