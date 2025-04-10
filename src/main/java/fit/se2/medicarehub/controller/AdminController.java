@@ -345,6 +345,7 @@ public class AdminController {
                 model.addAttribute("doctorDTO", new DoctorDTO());
             }
 
+            model.addAttribute("degreeList", DoctorDegree.values());
 
             return "admin/specialty-detail";
         }
