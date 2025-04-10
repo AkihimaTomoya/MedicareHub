@@ -24,6 +24,7 @@
                     <label>Tên khoa *</label>
                     <input type="text" class="ideal-width" th:field="*{specialtyName}" required>
                     <span class="error-message" th:if="${#fields.hasErrors('specialtyName')}" th:errors="*{specialtyName}"></span>
+                    <span class="error-message" th:if="${#fields.hasErrors('specialtyDescription')}" th:errors="*{specialtyDescription}"></span>
                     <label>Mô tả</label>
                     <textarea id="description" th:field="*{specialtyDescription}"></textarea>
                     <div class="buttons">

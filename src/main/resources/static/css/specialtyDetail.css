@@ -125,7 +125,14 @@
     border-radius: 5px;
     font-size: 17px;
 }
-
+.error-message {
+    font-size: 10px; /* Kích thước chữ nhỏ */
+    color: #ff0000; /* Màu chữ đỏ */
+    margin-bottom: 5px;
+    /* Khoảng cách dưới để không dính vào input tiếp theo */
+    display: block; /* Đảm bảo hiển thị dưới dạng block để xuống dòng */
+    text-align: left;
+}
 /* Container form hiển thị các phần tử theo hàng ngang */
 #status-form {
     display: flex;

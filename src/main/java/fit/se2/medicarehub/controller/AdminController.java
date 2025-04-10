@@ -335,11 +335,13 @@ public class AdminController {
             String headDoctorName = headDoctorNameOpt.orElse("Chưa có trưởng khoa");
             model.addAttribute("headDoctor", headDoctorName);
 
-            SpecialtyDTO specialtyDTO = new SpecialtyDTO();
-            specialtyDTO.setSpecialtyName(specialty.getSpecialtyName());
-            specialtyDTO.setSpecialtyDescription(specialty.getSpecialtyDescription());
-            specialtyDTO.setDoctorHeadId(headDoctorId);
-            model.addAttribute("specialtyDTO", specialtyDTO);
+            if (!model.containsAttribute("specialtyDTO")) {
+                SpecialtyDTO specialtyDTO = new SpecialtyDTO();
+                specialtyDTO.setSpecialtyName(specialty.getSpecialtyName());
+                specialtyDTO.setSpecialtyDescription(specialty.getSpecialtyDescription());
+                specialtyDTO.setDoctorHeadId(headDoctorId);
+                model.addAttribute("specialtyDTO", specialtyDTO);
+            }
 
             if (!model.containsAttribute("doctorDTO")) {
                 model.addAttribute("doctorDTO", new DoctorDTO());
@@ -373,6 +375,7 @@ public class AdminController {
         if (bindingResult.hasErrors()) {
             redirectAttributes.addFlashAttribute("specialtyDTO", specialtyDTO);
             redirectAttributes.addFlashAttribute("org.springframework.validation.BindingResult.specialtyDTO", bindingResult);
+
             return "redirect:/admin/specialty/detail/" + specialtyID + "?edit=false";
         }
 
