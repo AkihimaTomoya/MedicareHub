@@ -162,6 +162,7 @@ public class AdminService {
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy role bác sĩ"));
         user.setRoleID(doctorRole);
         User savedUser = userRepository.save(user);
+        doctor.setDob(doctorDTO.getDob());
         doctor.setLicenseNumber(doctorDTO.getLicenseNumber());
         doctor.setClinicAddress(doctorDTO.getClinicAddress());
         doctor.setAcademicDegree(DoctorDegree.valueOf(doctorDTO.getAcademicDegree()));

@@ -45,7 +45,26 @@ public class PatientService {
     public Patient createPatient(Patient patient) {
         String email = SecurityContextHolder.getContext().getAuthentication().getName();
         Optional<User> user = userRepository.findByEmail(email);
-        patient.setUser(user.get());
+        if (user.isPresent()) {
+            User currentUser = user.get();
+            if (patient.getUser() != null) {
+                if (patient.getUser().getPhoneNumber() != null) {
+                    currentUser.setPhoneNumber(patient.getUser().getPhoneNumber());
+                }
+                if (patient.getUser().getGender() != null) {
+                    currentUser.setGender(patient.getUser().getGender());
+                }
+                if (patient.getUser().getFullName() != null) {
+                    currentUser.setFullName(patient.getUser().getFullName());
+                }
+                if (patient.getUser().getIdentityNumber() != null) {
+                    currentUser.setIdentityNumber(patient.getUser().getIdentityNumber());
+                }
+            }
+            patient.setUser(currentUser);
+        } else {
+            throw new RuntimeException("User không tồn tại");
+        }
 
         String patientCode = "BN" + UUID.randomUUID().toString().substring(0, 4).toUpperCase();
         patient.setPatientCode(patientCode);
