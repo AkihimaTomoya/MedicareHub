@@ -134,7 +134,6 @@ public class DoctorController {
         record.setSymptoms(recordDTO.getSymptoms());
         record.setDiagnosis(recordDTO.getDiagnosis());
         record.setReExamination(recordDTO.isReExamination());
-        System.out.println(recordDTO.getTests());
         if (recordDTO.getTests() != null) {
             recordDTO.getTests().forEach(testDTO -> {
                 TestRecord test = new TestRecord();
@@ -145,7 +144,6 @@ public class DoctorController {
                 record.getTests().add(test);
             });
         }
-        System.out.println(recordDTO.getPrescriptions());
         if (recordDTO.getPrescriptions() != null) {
             recordDTO.getPrescriptions().forEach(prescriptionDTO -> {
                 Prescription prescription = new Prescription();

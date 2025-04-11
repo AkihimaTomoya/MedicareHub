@@ -17,6 +17,7 @@
     height: 620px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
     border-radius: 10px;
+    position: relative;
 }
 
 /* Search Bar */
@@ -255,8 +256,8 @@ h2 {
 
 .pagination-container {
     position: absolute;
-    bottom: 60px;
-    right: 50px;
+    bottom: 15px;
+    right: 15px;
     display: flex;
     justify-content: flex-end;
     align-items: center;

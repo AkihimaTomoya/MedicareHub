@@ -5,6 +5,7 @@
     background: white;
     border-radius: 10px;
     box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    position: relative;
 }
 .error-message {
     font-size: 10px; /* Kích thước chữ nhỏ */
@@ -179,8 +180,8 @@ td i {
 
 .pagination-container {
     position: absolute;
-    bottom: 120px;
-    right: 50px;
+    bottom: 15px;
+    right: 15px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
