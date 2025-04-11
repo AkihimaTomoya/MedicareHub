@@ -887,10 +887,21 @@ ul {
   text-align: center;
   background-color: #e0f7e9; /* Light green background */
   color: #2e7d32; /* Green text color */
-  padding: 15px;
+  padding: 5px;
   border-radius: 5px;
   margin: 15px 0;
   border: 1px solid #a5d6a7; /* Light green border */
+}
+
+.errors {
+  text-align: center;
+  background-color: #f7e0e0; /* Light green background */
+  color: #7d2e2e; /* Green text color */
+  padding: 5px;
+  border-radius: 5px;
+  margin: 15px 0;
+  border: 1px solid #d6a5a5;
+  display: block;
 }
 /* Animation for modal */
 @keyframes fadeIn {
@@ -981,17 +992,6 @@ ul {
 /* Đảm bảo dòng chữ không bị lệch */
 .form-container label span {
   line-height: 1; /* Đảm bảo dòng chữ không bị lệch */
-}
-
-/*Thông điệp trong form */
-.success-message {
-  text-align: center;
-  background-color: #e0f7e9;
-  color: #2e7d32;
-  padding: 15px;
-  border-radius: 5px;
-  margin: 15px 0;
-  border: 1px solid #a5d6a7;
 }
 
 .success-message p {

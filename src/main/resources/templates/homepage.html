@@ -6,6 +6,7 @@
   <meta charset="UTF-8">
   <title>Medical Hub - Home</title>
   <script th:src="@{/js/homepage.js}"></script>
+  <link rel="stylesheet" th:href="@{/css/homepage.css}" />
 </head>
 <body>
 <div layout:fragment="content">
@@ -60,12 +61,11 @@
       <!-- Forgot Password Form -->
       <div class="form-container" id="forgot-form" style="display: none" th:fragment="forgot">
         <h2>Khôi phục mật khẩu</h2>
-        <p>Chúng tôi sẽ gửi bạn hướng dẫn bằng email</p>
+        <p th:if="${successMessage == null}">Chúng tôi sẽ gửi bạn hướng dẫn bằng email</p>
+        <div class="errors" th:if="${error}" th:text="${error}"></div>
+        <div class="success-message" th:if="${successMessage}" th:text="${successMessage}"></div>
         <form id="forgot-form-submit" action="auth/forgot-password" method="post">
           <input type="email" name="email" placeholder="Nhập email của bạn" required />
-          <div id="forgot-success" class="success-message" style="display: none">
-            <p>Bạn vui lòng kiểm tra email để cấp lại mật khẩu!</p>
-          </div>
           <button type="submit" class="btn-primary">Gửi yêu cầu</button>
         </form>
         <p>Bạn muốn quay lại? <a href="#" class="register" onclick="showForm('login')">Đăng nhập</a></p>

@@ -158,10 +158,10 @@ public class AuthController {
     @PostMapping("/forgot-password")
     public String resetPassword(@RequestParam("email") String email,
                                 HttpServletRequest request,
-                                Model model) {
+                                RedirectAttributes redirectAttributes) {
         Optional<User> userOptional = userRepository.findByEmail(email);
         if (userOptional.isEmpty()) {
-            model.addAttribute("error", "User not found");
+            redirectAttributes.addFlashAttribute("error", "Không tim thấy tài khoản! Vui lòng nhập đúng email");
             return "redirect:/home?showForgot=true";
         }
         String token = UUID.randomUUID().toString();
@@ -175,8 +175,8 @@ public class AuthController {
 
         emailService.sendEmail(user.getEmail(), "Reset Password Link", "To reset your password, please click on the link below:\n" + resetPasswordUrl);
 
-        model.addAttribute("message", "Password reset successfully. Please check your email for confirmation.");
-        return "redirect:/home";
+        redirectAttributes.addFlashAttribute("successMessage", "Bạn vui lòng kiểm tra email để cấp lại mật khẩu!");
+        return "redirect:/home?showForgot=true";
     }
 
     private String getAppUrl(HttpServletRequest request) {

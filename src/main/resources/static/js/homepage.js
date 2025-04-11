@@ -11,7 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
     if (params.has('register')) {
         showForm('register')
     }
-    if (params.has('forgot')) {
+    if (params.has('showForgot')) {
         showForm('forgot')
     }
 });
