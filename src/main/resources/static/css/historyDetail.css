@@ -7,7 +7,7 @@
     justify-content: center;
     gap: 30px
 }
-        /* Header container */
+/* Header container */
 .header {
     display: flex;
     justify-content: flex-end;
@@ -285,8 +285,8 @@ table tr:nth-child(even) {
 
 /* Last row for total price */
 .total-row {
-    background: #009CE2; /* Blue background for emphasis */
-    color: white;
+    background: white; /* Blue background for emphasis */
+    color: black;
     font-weight: bold;
 }
 

@@ -154,8 +154,8 @@
     padding: 10px 20px; /* Tăng padding ngang để button rộng hơn */
     font-size: 14px;
     font-weight: bold;
-    background: #ccc;
-    color: #999;
+    background: green;
+    color: white;
     border: none;
     border-radius: 4px;
     /* Loại bỏ flex-basis để button có kích thước theo nội dung */

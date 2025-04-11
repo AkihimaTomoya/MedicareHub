@@ -109,7 +109,7 @@
                             <input type="hidden" th:field="${specialty.specialtyID}" />
                             <select class="status-dropdown" name="status">
                                 <option th:value="true" th:selected="${specialty.specialtyStatus == true}">Đang hoạt động</option>
-                                <option th:value="false" th:selected="${specialty.specialtyStatus == false}">Khóa</option>
+                                <option th:value="false" th:selected="${specialty.specialtyStatus == false}">Không hoạt động</option>
                             </select>
                             <button type="submit" class="update-btn">CẬP NHẬT</button>
                         </form>
