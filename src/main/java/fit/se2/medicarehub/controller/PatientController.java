@@ -14,6 +14,7 @@ import org.springframework.format.annotation.DateTimeFormat;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 
 import java.sql.Timestamp;
@@ -101,9 +102,16 @@ public class PatientController {
     }
 
     @PostMapping("/save-report")
-    public String saveReport(@ModelAttribute("patient") Patient patientForm) {
+    public String saveReport(@ModelAttribute("patient") Patient patientForm,
+                             BindingResult bindingResult,
+                             Model model) {
+        if (bindingResult.hasErrors()) {
+            model.addAttribute("error", true);
+            return "patient/update-report";
+        }
+
         Patient existing = patientService.getCurrentPatient();
-        if (existing != null && !existing.isDeleted()) {
+        if (existing != null) {
             // Cập nhật thông tin Patient
             existing.setDob(patientForm.getDob());
             existing.setAddress(patientForm.getAddress());
@@ -125,6 +133,7 @@ public class PatientController {
         }
         return "redirect:/patient/report";
     }
+
     @GetMapping("/delete-report")
     public String deleteRecord(@RequestParam(value = "patientId", required = false) Long patientId) {
         if (patientId != null) {

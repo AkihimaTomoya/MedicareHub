@@ -31,7 +31,8 @@ public class PatientService {
     public Patient getCurrentPatient() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         String email = auth.getName();
-        return patientRepository.findByUser_Email(email);
+        Optional<User> user = userRepository.findByUsername(email);
+        return patientRepository.findByUser_UserID(user.get().getUserID());
     }
 
     public void hideCurrentPatientById(Long patientId) {

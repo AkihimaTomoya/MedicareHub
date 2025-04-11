@@ -75,7 +75,7 @@
                 <a th:href="@{/patient/create-appointment}" class="btn-secondary">
                     <i class="fa-solid fa-layer-group"></i> Chọn thêm chuyên khoa
                 </a>
-                <form th:if="${appointment != null and appointment.status == 'PENDING'}"
+                <form th:if="${appointment != null and appointment.status == 'Chờ xác nhận'}"
                       th:action="@{/patient/confirm-appointment}" method="post">
                     <input type="hidden" name="appointmentId" th:value="${appointmentId}" />
                     <button type="submit" class="btn-primary">

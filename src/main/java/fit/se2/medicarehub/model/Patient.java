@@ -13,6 +13,7 @@ public class Patient {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long patientID;
+
     @OneToOne
     @JoinColumn(name = "userID", nullable = false, unique = true)
     private User user;
