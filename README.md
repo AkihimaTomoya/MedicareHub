@@ -1,7 +1,7 @@
 ### 1. Clone repository
 
 ```bash
-git clone https://github.com/AkihimaTomoya/MedicareHub.git
+git clone https://github.com/AkihimaTomoya/MedicareHub.git medicarehub
 cd medicarehub
 
 
