@@ -3,8 +3,6 @@
 ```bash
 git clone https://github.com/AkihimaTomoya/MedicareHub.git medicarehub
 cd medicarehub
-
-
 ```
 ### 2. Cấu hình application.properties
 Mở file src/main/resources/application.properties và điền các thông tin còn thiếu:
